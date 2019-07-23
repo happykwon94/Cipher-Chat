@@ -1,0 +1,10 @@
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\bin\Debug\ChattingForm.exe.config
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\bin\Debug\ChattingForm.exe
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\bin\Debug\ChattingForm.pdb
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.csprojAssemblyReference.cache
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.Properties.Resources.resources
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.csproj.GenerateResource.cache
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.csproj.CoreCompileInputs.cache
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.exe
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.pdb
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.ChatForm.resources
