@@ -73,19 +73,21 @@
             // 
             // InputPort
             // 
+            this.InputPort.Font = new System.Drawing.Font("굴림", 13F);
             this.InputPort.Location = new System.Drawing.Point(238, 30);
             this.InputPort.Multiline = true;
             this.InputPort.Name = "InputPort";
-            this.InputPort.Size = new System.Drawing.Size(104, 30);
+            this.InputPort.Size = new System.Drawing.Size(104, 31);
             this.InputPort.TabIndex = 10;
             // 
             // InputIp
             // 
             this.InputIp.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.InputIp.Font = new System.Drawing.Font("굴림", 13F);
             this.InputIp.Location = new System.Drawing.Point(13, 31);
             this.InputIp.Multiline = true;
             this.InputIp.Name = "InputIp";
-            this.InputIp.Size = new System.Drawing.Size(219, 30);
+            this.InputIp.Size = new System.Drawing.Size(219, 31);
             this.InputIp.TabIndex = 9;
             // 
             // SendButton
@@ -94,7 +96,7 @@
             this.SendButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.SendButton.FlatAppearance.BorderSize = 0;
             this.SendButton.Font = new System.Drawing.Font("Arial Rounded MT Bold", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SendButton.Location = new System.Drawing.Point(343, 568);
+            this.SendButton.Location = new System.Drawing.Point(343, 567);
             this.SendButton.Name = "SendButton";
             this.SendButton.Size = new System.Drawing.Size(81, 35);
             this.SendButton.TabIndex = 13;
@@ -104,7 +106,8 @@
             // 
             // InputMSG
             // 
-            this.InputMSG.Location = new System.Drawing.Point(12, 568);
+            this.InputMSG.Font = new System.Drawing.Font("굴림", 13F);
+            this.InputMSG.Location = new System.Drawing.Point(12, 567);
             this.InputMSG.Multiline = true;
             this.InputMSG.Name = "InputMSG";
             this.InputMSG.Size = new System.Drawing.Size(325, 35);
@@ -114,11 +117,12 @@
             // 
             this.OutputMSG.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.OutputMSG.Enabled = false;
+            this.OutputMSG.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.OutputMSG.Location = new System.Drawing.Point(12, 67);
             this.OutputMSG.Multiline = true;
             this.OutputMSG.Name = "OutputMSG";
             this.OutputMSG.ReadOnly = true;
-            this.OutputMSG.Size = new System.Drawing.Size(412, 488);
+            this.OutputMSG.Size = new System.Drawing.Size(412, 487);
             this.OutputMSG.TabIndex = 8;
             // 
             // Form1
@@ -134,8 +138,10 @@
             this.Controls.Add(this.SendButton);
             this.Controls.Add(this.InputMSG);
             this.Controls.Add(this.OutputMSG);
+            this.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Cipher-Chat (Client)";
             this.ResumeLayout(false);
             this.PerformLayout();

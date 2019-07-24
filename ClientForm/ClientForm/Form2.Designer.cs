@@ -58,6 +58,7 @@
             // 
             // InputPwd
             // 
+            this.InputPwd.Font = new System.Drawing.Font("굴림", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.InputPwd.Location = new System.Drawing.Point(14, 40);
             this.InputPwd.Multiline = true;
             this.InputPwd.Name = "InputPwd";
@@ -74,6 +75,7 @@
             this.Controls.Add(this.InputPwd);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form2";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Password";
             this.ResumeLayout(false);
             this.PerformLayout();

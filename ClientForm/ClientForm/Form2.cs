@@ -17,11 +17,28 @@ namespace ClientForm
             InitializeComponent();
         }
 
+        private string Input_Pwd;
+        public string PassPwd
+        {
+            get { return this.Input_Pwd; }
+            set { this.Input_Pwd = value; }
+        }
+
         private void InputPwdButton_Click(object sender, EventArgs e)
         {
-            string input_pwd = this.InputPwd.Text;
 
-
+            if (this.InputPwd.Text == "")
+            {
+                MessageBox.Show("[ Input Error ]");
+                this.InputPwd.Clear();
+            }
+            else
+            {
+                PassPwd = this.InputPwd.Text;
+                this.Hide();
+            }
+            
         }
+
     }
 }

@@ -43,6 +43,7 @@
             // 
             this.OutputMSG.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.OutputMSG.Enabled = false;
+            this.OutputMSG.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.OutputMSG.Location = new System.Drawing.Point(12, 67);
             this.OutputMSG.Multiline = true;
             this.OutputMSG.Name = "OutputMSG";
@@ -52,6 +53,7 @@
             // 
             // InputMSG
             // 
+            this.InputMSG.Font = new System.Drawing.Font("굴림", 13F);
             this.InputMSG.Location = new System.Drawing.Point(12, 568);
             this.InputMSG.Multiline = true;
             this.InputMSG.Name = "InputMSG";
@@ -75,6 +77,7 @@
             // InputIp
             // 
             this.InputIp.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.InputIp.Font = new System.Drawing.Font("굴림", 13F);
             this.InputIp.Location = new System.Drawing.Point(13, 31);
             this.InputIp.Multiline = true;
             this.InputIp.Name = "InputIp";
@@ -83,11 +86,13 @@
             // 
             // InputPort
             // 
+            this.InputPort.Font = new System.Drawing.Font("굴림", 13F);
             this.InputPort.Location = new System.Drawing.Point(238, 30);
             this.InputPort.Multiline = true;
             this.InputPort.Name = "InputPort";
             this.InputPort.Size = new System.Drawing.Size(104, 30);
             this.InputPort.TabIndex = 2;
+            this.InputPort.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputPort_KeyDown);
             // 
             // OpenButton
             // 
@@ -120,7 +125,6 @@
             this.label2.Size = new System.Drawing.Size(52, 17);
             this.label2.TabIndex = 7;
             this.label2.Text = "Port : ";
-            this.label2.Click += new System.EventHandler(this.Label2_Click);
             // 
             // ChatForm
             // 
@@ -137,6 +141,7 @@
             this.Font = new System.Drawing.Font("굴림", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ChatForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Cipher-Talk (Server)";
             this.ResumeLayout(false);
             this.PerformLayout();

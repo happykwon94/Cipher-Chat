@@ -26,10 +26,10 @@ namespace ClientForm
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool recv_pwd_result_decrypt(string input_pwd);
 
-
-        Socket client_socket;
-        byte[] bytes = new byte[1024];
-        string data;
+        //**********************************************************************************************************************
+        TcpClient client = new TcpClient();
+        NetworkStream stream = default(NetworkStream);
+        //**********************************************************************************************************************
 
         public Form1()
         {
@@ -40,13 +40,11 @@ namespace ClientForm
         private void OpenButton_Click(object sender, EventArgs e)
         {
             string input_ip = this.InputIp.Text;
-
             string input_port_temp = this.InputPort.Text;
-            int input_port = int.Parse(input_port_temp);
 
-            if (input_ip == "" || input_port_temp == "")
+            if (String.IsNullOrWhiteSpace(input_ip) || String.IsNullOrWhiteSpace(input_port_temp))
             {
-                MessageBox.Show("IP, PORT 입력 필요");
+                MessageBox.Show("[ Input Error ]");
 
                 this.InputIp.Clear();
                 this.InputPort.Clear();
@@ -56,61 +54,77 @@ namespace ClientForm
             {
                 try
                 {
-                    client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    client_socket.Connect(new IPEndPoint(IPAddress.Parse(input_ip), input_port));
-                    this.OutputMSG.AppendText(String.Format("소켓 연결이 되었습니다 {0} -> ", client_socket.RemoteEndPoint.ToString()));
+                    int input_port = int.Parse(input_port_temp);
+                    client.Connect(input_ip, input_port);
+                    stream = client.GetStream();
 
-                    MessageBox.Show("enc_msg : " + 1);
+                    this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
 
-                    this.InputIp.ReadOnly = true;
-                    this.InputPort.ReadOnly = true;
+                    Form2 pwd_form = new Form2();
+                    pwd_form.ShowDialog();
 
-                    MessageBox.Show("enc_msg : " + 2);
-                    //아래 두개는 do_receive 함수를 위한 쓰레드입니다.
-                    //쓰레드가 있어야만 연결된다고 해야할까요.
-                    Thread listen_thread = new Thread(do_receive);
-                    listen_thread.Start();
+                    string input_pwd = pwd_form.PassPwd;
+
+                    Form3 name_set_form = new Form3();
+                    name_set_form.ShowDialog();
+
+                    string input_chat_name = name_set_form.PassChatName;
+
+                    //닉네임 설정
+                    byte[] buffer = Encoding.Unicode.GetBytes(input_chat_name + "$");
+                    stream.Write(buffer, 0, buffer.Length);
+                    stream.Flush();
+                    this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \""+ input_chat_name + "\"\n\n");
+                    //닉네임 설정
+
+                    Thread t_handler = new Thread(RecvMsg);
+                    t_handler.IsBackground = true;
+                    t_handler.Start();
                 }
-                catch(Exception err)
+                catch (Exception err)
                 {
-                    this.OutputMSG.AppendText("[Error] "+ err + "\n");
+                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
                 }
-            }
-
         }
 
-        void do_receive()
+        }
+        //**********************************************************************************************************************
+        private void RecvMsg()
         {
             while (true)
             {
-                while (true)
-                {
-                    bytes = new byte[1024];
-                    int bytesRec = client_socket.Receive(bytes);
-                    data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
-                    if (data.IndexOf("<eof>") > -1)
-                        break;
-                }
-                data = data.Substring(0, data.Length - 5);
+                stream = client.GetStream();
+                int BUFFERSIZE = client.ReceiveBufferSize;
+                byte[] buffer = new byte[BUFFERSIZE];
+                int bytes = stream.Read(buffer, 0, buffer.Length);
 
-                Invoke((MethodInvoker)delegate
-                {
-                    this.OutputMSG.AppendText(data+"\n");
-                }
-                );
-                data = "";
+                string message = Encoding.Unicode.GetString(buffer, 0, bytes);
+
+                OutputMsgPrint(message);
             }
         }
 
+        private void OutputMsgPrint(string msg)
+        {
+            if (OutputMSG.InvokeRequired)
+            {
+                OutputMSG.BeginInvoke(new MethodInvoker(delegate
+                {
+                    OutputMSG.AppendText(msg + Environment.NewLine);
+                }));
+            }
+            else
+                OutputMSG.AppendText(msg + Environment.NewLine);
+        }
+        //**********************************************************************************************************************
+
+
         private void SendButton_Click(object sender, EventArgs e)
         {
-            string enc_msg = encrypt_msg(InputMSG.Text);
-            MessageBox.Show("enc_msg(send) : "+ enc_msg);
-
-            byte[] msg = Encoding.UTF8.GetBytes(enc_msg + "<eof>");
-            int bytesSent = client_socket.Send(msg);
-
-            InputMSG.Clear();
+            byte[] buffer = Encoding.Unicode.GetBytes(this.InputMSG.Text + "$");
+            stream.Write(buffer, 0, buffer.Length);
+            stream.Flush();
         }
+
     }
 }

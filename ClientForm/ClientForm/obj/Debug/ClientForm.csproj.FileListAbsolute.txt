@@ -9,3 +9,4 @@ C:\Users\komsco\source\repos\ClientForm\ClientForm\obj\Debug\ClientForm.csproj.G
 C:\Users\komsco\source\repos\ClientForm\ClientForm\obj\Debug\ClientForm.csproj.CoreCompileInputs.cache
 C:\Users\komsco\source\repos\ClientForm\ClientForm\obj\Debug\ClientForm.exe
 C:\Users\komsco\source\repos\ClientForm\ClientForm\obj\Debug\ClientForm.pdb
+C:\Users\komsco\source\repos\ClientForm\ClientForm\obj\Debug\ClientForm.Form3.resources
