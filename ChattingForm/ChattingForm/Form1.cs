@@ -25,12 +25,16 @@ namespace ChattingForm
         public static extern void key_init();
 
         [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern string decrypt_msg(string cipher_msg);
+        public static extern IntPtr encrypt_msg(string plain_msg);
+
+        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr decrypt_msg(string cipher_msg);
 
         [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern string compare_pwd(string input_pwd);
 
 //***************************************** 전역변수 설정(시작) *************************************************
+
         TcpListener server = null;
         TcpClient client = null;
         static int counter = 0;
@@ -95,7 +99,11 @@ namespace ChattingForm
 
         private void OnReceived(string message, string user_name)
         {
-            string input_user_msg = "[" + user_name + "] " + message;
+            //string input_user_msg = "[" + user_name + "] **" + message;
+            //DisplayText(input_user_msg);
+            //SendMessageAll(message, user_name, true);
+
+            string input_user_msg = "[" + user_name + "] pr1" + message;
             DisplayText(input_user_msg);
             SendMessageAll(message, user_name, true);
         }
@@ -112,7 +120,7 @@ namespace ChattingForm
 
                 if (flag)
                 {
-                    buffer = Encoding.Unicode.GetBytes("[" + user_name + "] " + message);
+                    buffer = Encoding.Unicode.GetBytes("[ " + user_name + " ] pr2" + message);
                 }
                 else
                 {

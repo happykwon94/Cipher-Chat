@@ -64,6 +64,7 @@
             this.InputPwd.Name = "InputPwd";
             this.InputPwd.Size = new System.Drawing.Size(206, 27);
             this.InputPwd.TabIndex = 3;
+            this.InputPwd.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputPwd_KeyDown);
             // 
             // Form2
             // 

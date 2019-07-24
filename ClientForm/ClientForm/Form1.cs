@@ -21,10 +21,16 @@ namespace ClientForm
         public static extern void key_init();
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern string encrypt_msg(string plain_msg);
+        public static extern IntPtr encrypt_msg(string plain_msg);
+
+        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr decrypt_msg(string cipher_msg);
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool recv_pwd_result_decrypt(string input_pwd);
+
+        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr test_string_3(string input_pwd);
 
         //**********************************************************************************************************************
         TcpClient client = new TcpClient();
@@ -121,9 +127,33 @@ namespace ClientForm
 
         private void SendButton_Click(object sender, EventArgs e)
         {
-            byte[] buffer = Encoding.Unicode.GetBytes(this.InputMSG.Text + "$");
+            //byte[] buffer = Encoding.Unicode.GetBytes(this.InputMSG.Text + "$");
+            //stream.Write(buffer, 0, buffer.Length);
+            //stream.Flush();
+            //this.InputMSG.Clear();
+
+
+            string org = this.InputMSG.Text;
+
+            MessageBox.Show("org : " + org);
+
+            IntPtr enc_ptr = encrypt_msg(org+"$");
+
+            string enc_org = Marshal.PtrToStringAnsi(enc_ptr);
+
+            MessageBox.Show("enc_org : " + enc_org);
+
+            IntPtr dec_ptr = decrypt_msg(enc_org);
+
+            string re_org = Marshal.PtrToStringAnsi(dec_ptr);
+
+            MessageBox.Show("re_org : " + re_org);
+
+            byte[] buffer = Encoding.Unicode.GetBytes(enc_org);
             stream.Write(buffer, 0, buffer.Length);
             stream.Flush();
+            this.InputMSG.Clear();
+
         }
 
     }

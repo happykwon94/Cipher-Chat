@@ -40,5 +40,12 @@ namespace ClientForm
             
         }
 
+        private void InputPwd_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                InputPwdButton_Click(sender, e);
+            }
+        }
     }
 }

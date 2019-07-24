@@ -105,7 +105,10 @@ void recv_msg(SOCKET target) // 전달 받고 출력하기
 			printf("접속종료\n");
 			break;
 		}
-
+		
+		char output_temp[255] = {};
+		strcpy(output_temp, output_buf);
+		
 		output_buf[recvsize] = '\0';
 
 		std::string to_string_output_buf(output_buf); //char 배열을 string으로

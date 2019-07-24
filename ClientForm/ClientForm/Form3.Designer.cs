@@ -64,6 +64,7 @@
             this.InputChatName.Name = "InputChatName";
             this.InputChatName.Size = new System.Drawing.Size(206, 27);
             this.InputChatName.TabIndex = 6;
+            this.InputChatName.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputChatName_KeyDown);
             // 
             // Form3
             // 

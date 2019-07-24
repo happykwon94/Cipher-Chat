@@ -45,6 +45,7 @@ std::string encrypt_msg(std::string plain_msg)  // ¾ÏÈ£È­
 		strlen(char_plain_msg), (const unsigned char*)iv, &lea_key);
 
 	std::string cipher_msg(c_msg);
+
 	return cipher_msg;
 }
 

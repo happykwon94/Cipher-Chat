@@ -9,9 +9,9 @@ namespace server{
 
 	extern "C" SERVER_API void key_init();
 
-	extern "C" SERVER_API char* decrypt_msg(char* cipher_msg);
+	extern "C" SERVER_API char* encrypt_msg(char* plain_msg);
 
-	extern "C" SERVER_API char* recv_thread(SOCKET target);
+	extern "C" SERVER_API char* decrypt_msg(char* cipher_msg);
 
 	extern "C" SERVER_API char* compare_pwd(char* input_pwd);
 

@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Text;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace ChattingForm
 {
@@ -28,6 +29,14 @@ namespace ChattingForm
 
     class handleClient
     {
+
+
+        //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr decrypt_msg(string cipher_msg);
+
+        //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         TcpClient clientSocket = null;
         public Dictionary<TcpClient, string> clientList = null;
 
@@ -62,16 +71,38 @@ namespace ChattingForm
                     MessageCount++;
                     stream = clientSocket.GetStream();
                     bytes = stream.Read(buffer, 0, buffer.Length);
-                    msg = Encoding.Unicode.GetString(buffer, 0, bytes);
-                    msg = msg.Substring(0, msg.IndexOf("$"));
 
+                    msg = Encoding.Unicode.GetString(buffer, 0, bytes);
+
+                    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+                    MessageBox.Show("msg : " + msg);
+
+                    MessageBox.Show("decrypt_msg(msg) : " + decrypt_msg(msg));
+                    IntPtr dec_ptr = decrypt_msg(msg);
+
+                    string dec_msg = Marshal.PtrToStringAnsi(dec_ptr);
+                    MessageBox.Show("dec_msg : " + dec_msg);
+                    MessageBox.Show("msg.IndexOf " + msg.IndexOf("$"));
+                    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+                    //msg = msg.Substring(0, msg.IndexOf("$"));
+
+                //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                     if (OnReceived != null)
                         OnReceived(msg, clientList[clientSocket].ToString());
+                //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+                    //if (OnReceived != null)
+                    //    OnReceived(msg, clientList[clientSocket].ToString());
+
+
                 }
             }
-            catch (SocketException se)
+            catch (SocketException err)
             {
-                Trace.WriteLine(string.Format("doChat - SocketException : {0}", se.Message));
+                Trace.WriteLine(string.Format("doChat - SocketException : {0}", err.Message));
 
                 if (clientSocket != null)
                 {
@@ -82,9 +113,9 @@ namespace ChattingForm
                     stream.Close();
                 }
             }
-            catch (Exception ex)
+            catch (Exception err)
             {
-                Trace.WriteLine(string.Format("doChat - Exception : {0}", ex.Message));
+                Trace.WriteLine(string.Format("doChat - Exception : {0}", err.Message));
 
                 if (clientSocket != null)
                 {
