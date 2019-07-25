@@ -15,6 +15,7 @@
 #include <process.h>
 #include <thread>
 #include <string>
+#include <atlstr.h>
 
 #include "lea.h"
 

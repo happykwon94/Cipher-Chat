@@ -36,7 +36,11 @@ namespace ChattingForm
         [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr decrypt_msg(string cipher_msg);
 
+        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void key_init();
+
         //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
         TcpClient clientSocket = null;
         public Dictionary<TcpClient, string> clientList = null;
 
@@ -65,6 +69,7 @@ namespace ChattingForm
                 string msg = string.Empty;
                 int bytes = 0;
                 int MessageCount = 0;
+                key_init();
 
                 while (true)
                 {
@@ -75,15 +80,10 @@ namespace ChattingForm
                     msg = Encoding.Unicode.GetString(buffer, 0, bytes);
 
                     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-                    MessageBox.Show("msg : " + msg);
-
-                    MessageBox.Show("decrypt_msg(msg) : " + decrypt_msg(msg));
                     IntPtr dec_ptr = decrypt_msg(msg);
 
-                    string dec_msg = Marshal.PtrToStringAnsi(dec_ptr);
-                    MessageBox.Show("dec_msg : " + dec_msg);
-                    MessageBox.Show("msg.IndexOf " + msg.IndexOf("$"));
+                    string dec_msg = Marshal.PtrToStringAnsi(dec_ptr).TrimEnd('\0');
+
                     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

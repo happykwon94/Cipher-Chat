@@ -1,28 +1,20 @@
 ﻿  pch.cpp
   C:\Users\komsco\source\repos\client_dll\LEA_Source\include\config.h: warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
   client.cpp
-C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(45,1): warning C4996:  'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message :  'strcpy' 선언을 참조하십시오.
-C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(82,1): warning C4996:  'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(67,6): error C2374:  'size_needed': 재정의. 여러 번 초기화했습니다.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(51): message :  'size_needed' 선언을 참조하십시오.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(73,25): error C2440:  'return': 'const _Elem *'에서 'char *'(으)로 변환할 수 없습니다.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(73,25): error C2440:         with
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(73,25): error C2440:         [
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(73,25): error C2440:             _Elem=wchar_t
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(73,25): error C2440:         ]
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(73,23): message :  가리킨 형식이 관련이 없습니다. 변환하려면 reinterpret_cast, C 스타일 캐스트 또는 함수 스타일 캐스트가 필요합니다.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(112,25): error C2082:  'cipher_msg' 정식 매개 변수 재정의
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(117,64): error C2065:  'wstrTo': 선언되지 않은 식별자입니다.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(118,3): error C2065:  'wstrTo': 선언되지 않은 식별자입니다.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(117,2): error C2660:  'lea_cbc_dec': 함수는 3개의 매개 변수를 사용하지 않습니다.
+C:\Users\komsco\source\repos\client_dll\LEA_Source\include\lea.h(25,13): message :  'lea_cbc_dec' 선언을 참조하십시오.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(127,14): error C2374:  'return_msg': 재정의. 여러 번 초기화했습니다.
   dllmain.cpp
   코드를 생성하고 있습니다...
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message :  'strcpy' 선언을 참조하십시오.
-  libLEA.lib(lea_base.obj) : /GL로 컴파일한 MSIL .netmodule 또는 모듈이 있습니다. /LTCG를 지정하여 링크를 다시 시작하십시오. /LTCG를 링크 명령줄에 추가하면 링커 성능이 향상됩니다.
-LINK : warning LNK4075: '/INCREMENTAL'이(가) '/LTCG' 사양으로 인해 무시됩니다.
-     C:\Users\komsco\source\repos\client_dll\Debug\client_dll.lib 라이브러리 및 C:\Users\komsco\source\repos\client_dll\Debug\client_dll.exp 개체를 생성하고 있습니다.
-LINK : warning LNK4098: 'LIBCMT' defaultlib가 다른 라이브러리와 충돌합니다. /NODEFAULTLIB:library를 사용하십시오.
-  코드를 생성하고 있습니다.
-  코드를 생성했습니다.
-libLEA.lib(lea_base.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_base.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_fallback.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_fallback.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_avx2_sse2.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_avx2_sse2.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_generic.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_generic.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_sse2.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_sse2.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_avx2_xop.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_avx2_xop.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_xop.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_xop.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_gcm_pclmul.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_gcm_pclmul.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_gcm_generic.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_gcm_generic.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(cpu_info_ia32.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(cpu_info_ia32.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_core.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_core.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_core_xop.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_core_xop.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-  client_dll.vcxproj -> C:\Users\komsco\source\repos\client_dll\Debug\client_dll.dll
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(113): message :  'return_msg' 선언을 참조하십시오.

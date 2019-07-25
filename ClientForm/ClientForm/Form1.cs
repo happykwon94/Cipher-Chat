@@ -30,8 +30,13 @@ namespace ClientForm
         public static extern bool recv_pwd_result_decrypt(string input_pwd);
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr test_string_3(string input_pwd);
+        public static extern UIntPtr test_string_3(string input_pwd);
 
+        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int decrypt_msg_int(string input_pwd);
+
+        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int encrypt_msg_int(string input_pwd);
         //**********************************************************************************************************************
         TcpClient client = new TcpClient();
         NetworkStream stream = default(NetworkStream);
@@ -65,6 +70,10 @@ namespace ClientForm
                     stream = client.GetStream();
 
                     this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
+
+                    this.InputIp.ReadOnly = true;
+                    this.InputPort.ReadOnly = true;
+                    this.OpenButton.Enabled = false;
 
                     Form2 pwd_form = new Form2();
                     pwd_form.ShowDialog();
@@ -136,18 +145,32 @@ namespace ClientForm
             string org = this.InputMSG.Text;
 
             MessageBox.Show("org : " + org);
+            MessageBox.Show("org(length) : " + org.Length);
 
-            IntPtr enc_ptr = encrypt_msg(org+"$");
+            IntPtr enc_ptr = encrypt_msg(org + "$");
 
-            string enc_org = Marshal.PtrToStringAnsi(enc_ptr);
+            string enc_org = Marshal.PtrToStringUni(enc_ptr);
 
-            MessageBox.Show("enc_org : " + enc_org);
+            MessageBox.Show("encrypt : " + enc_org);
+            MessageBox.Show("enc_org(length) : " + enc_org.Length);
 
-            IntPtr dec_ptr = decrypt_msg(enc_org);
+            //######
+            int q = encrypt_msg_int(org + "$");
+            MessageBox.Show("enc(length) : " + q);
+            //#####
 
-            string re_org = Marshal.PtrToStringAnsi(dec_ptr);
 
-            MessageBox.Show("re_org : " + re_org);
+            //######
+            IntPtr p = decrypt_msg(enc_org);
+            string test_dec = Marshal.PtrToStringUni(p);
+            MessageBox.Show("dec : " + test_dec);
+            //#####
+
+            int dec_ptr = decrypt_msg_int(enc_org);
+
+            //string dec_org = Marshal.PtrToStringAnsi(dec_ptr).TrimEnd('\0');
+
+            MessageBox.Show("dec(length) : " + dec_ptr);
 
             byte[] buffer = Encoding.Unicode.GetBytes(enc_org);
             stream.Write(buffer, 0, buffer.Length);
@@ -156,5 +179,12 @@ namespace ClientForm
 
         }
 
+        private void InputPort_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                OpenButton_Click(sender, e);
+            }
+        }
     }
 }

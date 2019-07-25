@@ -11,6 +11,8 @@ const char* iv = "internshipprog!";
 void server::key_init()
 {
 	lea_set_key(&lea_key, (const unsigned char*)iv, 16);
+
+	return;
 }
 
 char* server::encrypt_msg(char* plain_msg)  // 암호화
@@ -21,7 +23,7 @@ char* server::encrypt_msg(char* plain_msg)  // 암호화
 
 
 	for (int i = strlen(plain_msg); (strlen(plain_msg) % 16) != 0; i++) {
-		*(plain_msg + i) = '*';
+		*(plain_msg + i) = ' ';
 		*(plain_msg + i + 1) = '\0';
 	}
 
@@ -37,7 +39,7 @@ char* server::encrypt_msg(char* plain_msg)  // 암호화
 char* server::decrypt_msg(char* cipher_msg)
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	strcpy_s(temp, cipher_msg);
+	strcpy(temp, cipher_msg);
 
 	static char plain_msg[255] = { 0, };
 

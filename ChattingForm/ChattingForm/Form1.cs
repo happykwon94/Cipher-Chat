@@ -99,10 +99,6 @@ namespace ChattingForm
 
         private void OnReceived(string message, string user_name)
         {
-            //string input_user_msg = "[" + user_name + "] **" + message;
-            //DisplayText(input_user_msg);
-            //SendMessageAll(message, user_name, true);
-
             string input_user_msg = "[" + user_name + "] pr1" + message;
             DisplayText(input_user_msg);
             SendMessageAll(message, user_name, true);
@@ -152,8 +148,6 @@ namespace ChattingForm
         public ChatForm()
         {
             InitializeComponent();
-            key_init();
-
         }
 
         private void OpenButton_Click(object sender, EventArgs e)
