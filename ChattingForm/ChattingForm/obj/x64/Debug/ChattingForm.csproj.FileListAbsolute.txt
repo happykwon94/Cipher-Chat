@@ -10,3 +10,13 @@ C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\x64\Debug\ChattingFor
 C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.csproj.CoreCompileInputs.cache
 C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.exe
 C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.pdb
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\bin\x64\Debug\ChattingForm.exe.config
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\bin\x64\Debug\ChattingForm.exe
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\bin\x64\Debug\ChattingForm.pdb
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.csprojAssemblyReference.cache
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.ChatForm.resources
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.Properties.Resources.resources
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.csproj.GenerateResource.cache
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.csproj.CoreCompileInputs.cache
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.exe
+C:\Users\82105\Desktop\git\Cipher-Chat\ChattingForm\ChattingForm\obj\x64\Debug\ChattingForm.pdb

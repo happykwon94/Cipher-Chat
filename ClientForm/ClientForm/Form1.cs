@@ -24,7 +24,7 @@ namespace ClientForm
         public static extern IntPtr encrypt_msg(string plain_msg);
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr decrypt_msg(string cipher_msg);
+        public static extern void decrypt_msg(StringBuilder cipher_msg, StringBuilder plain_msg);
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool recv_pwd_result_decrypt(string input_pwd);
@@ -32,11 +32,6 @@ namespace ClientForm
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr test_string_3(string input_pwd);
 
-        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int decrypt_msg_int(string input_pwd);
-
-        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int encrypt_msg_int(string input_pwd);
         //**********************************************************************************************************************
         TcpClient client = new TcpClient();
         NetworkStream stream = default(NetworkStream);
@@ -144,35 +139,20 @@ namespace ClientForm
 
             string org = this.InputMSG.Text;
 
-            MessageBox.Show("org : " + org);
-            MessageBox.Show("org(length) : " + org.Length);
+            IntPtr enc_ptr = encrypt_msg(org);
+            string enc_msg = Marshal.PtrToStringAnsi(enc_ptr);
+            MessageBox.Show("enc_msg : " + enc_msg);
+            MessageBox.Show("enc_msg(length) : " + enc_msg.Length);
 
-            IntPtr enc_ptr = encrypt_msg(org + "$");
+            StringBuilder input_org = new StringBuilder(enc_msg);
+            StringBuilder output_org = new StringBuilder();
+            decrypt_msg(input_org, output_org);
 
-            string enc_org = Marshal.PtrToStringUni(enc_ptr);
+            MessageBox.Show("input_org : " + output_org.ToString());
+            //MessageBox.Show("input_org : " + output_org.);
+            //MessageBox.Show("dec_msg {0} : " , output_org);
 
-            MessageBox.Show("encrypt : " + enc_org);
-            MessageBox.Show("enc_org(length) : " + enc_org.Length);
-
-            //######
-            int q = encrypt_msg_int(org + "$");
-            MessageBox.Show("enc(length) : " + q);
-            //#####
-
-
-            //######
-            IntPtr p = decrypt_msg(enc_org);
-            string test_dec = Marshal.PtrToStringUni(p);
-            MessageBox.Show("dec : " + test_dec);
-            //#####
-
-            int dec_ptr = decrypt_msg_int(enc_org);
-
-            //string dec_org = Marshal.PtrToStringAnsi(dec_ptr).TrimEnd('\0');
-
-            MessageBox.Show("dec(length) : " + dec_ptr);
-
-            byte[] buffer = Encoding.Unicode.GetBytes(enc_org);
+            byte[] buffer = Encoding.Unicode.GetBytes(org+"$");
             stream.Write(buffer, 0, buffer.Length);
             stream.Flush();
             this.InputMSG.Clear();

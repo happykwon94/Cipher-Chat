@@ -99,7 +99,7 @@ namespace ChattingForm
 
         private void OnReceived(string message, string user_name)
         {
-            string input_user_msg = "[" + user_name + "] pr1" + message;
+            string input_user_msg = "[" + user_name + "] " + message;
             DisplayText(input_user_msg);
             SendMessageAll(message, user_name, true);
         }
@@ -116,7 +116,7 @@ namespace ChattingForm
 
                 if (flag)
                 {
-                    buffer = Encoding.Unicode.GetBytes("[ " + user_name + " ] pr2" + message);
+                    buffer = Encoding.Unicode.GetBytes("[ " + user_name + " ] " + message);
                 }
                 else
                 {
@@ -192,7 +192,6 @@ namespace ChattingForm
                 MessageBox.Show("MSG error! ");
             else
             {
-                //inputMSG(msg);
 
                 string recv_msg = "[Receive MSG] : " + msg + "\n";
 

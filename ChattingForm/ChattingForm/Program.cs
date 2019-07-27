@@ -79,23 +79,10 @@ namespace ChattingForm
 
                     msg = Encoding.Unicode.GetString(buffer, 0, bytes);
 
-                    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-                    IntPtr dec_ptr = decrypt_msg(msg);
+                    msg = msg.Substring(0, msg.IndexOf("$"));
 
-                    string dec_msg = Marshal.PtrToStringAnsi(dec_ptr).TrimEnd('\0');
-
-                    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-                    //msg = msg.Substring(0, msg.IndexOf("$"));
-
-                //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                     if (OnReceived != null)
                         OnReceived(msg, clientList[clientSocket].ToString());
-                //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-                    //if (OnReceived != null)
-                    //    OnReceived(msg, clientList[clientSocket].ToString());
 
 
                 }
