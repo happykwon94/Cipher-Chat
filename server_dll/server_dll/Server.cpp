@@ -2,74 +2,67 @@
 #include "Server.h"
 
 #define PWD "komsco.com"
-#define ALLO "OK"
-#define NOT_ALLO "NOK"
 
 LEA_KEY lea_key;
 const char* iv = "internshipprog!";
 
-void server::key_init()
+void key_init()
 {
 	lea_set_key(&lea_key, (const unsigned char*)iv, 16);
 
 	return;
 }
 
-char* server::encrypt_msg(char* plain_msg)  // 암호화
+unsigned char* encrypt_msg(unsigned char* plain_msg)  // 암호화
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
+	unsigned char cipher_msg_op[255] = {};
+	int result_cipher[128];
 
-	static char cipher_msg[255] = { 0, };
+	strcpy(temp, (char*)plain_msg);
 
+	std::string s_temp = temp;
 
-	for (int i = strlen(plain_msg); (strlen(plain_msg) % 16) != 0; i++) {
-		*(plain_msg + i) = ' ';
-		*(plain_msg + i + 1) = '\0';
+	while (s_temp.length() % 16 != 0)
+	{
+		s_temp.append(" ");
 	}
 
-	strcpy_s(temp, plain_msg);
+	lea_cbc_enc(cipher_msg_op, (const unsigned char*)s_temp.c_str(),
+		s_temp.length(), (const unsigned char*)iv, &lea_key);
 
-	lea_cbc_enc((unsigned char*)cipher_msg, (const unsigned char*)temp,
-		strlen(temp), (const unsigned char*)iv, &lea_key);
-
-	return cipher_msg;
-
+	return cipher_msg_op;
 }
 
-char* server::decrypt_msg(char* cipher_msg)
+unsigned char* decrypt_msg(unsigned char* cipher_msg)
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	strcpy(temp, cipher_msg);
+	unsigned char plain_msg_op[255] = {};
 
-	static char plain_msg[255] = { 0, };
+	lea_cbc_dec(plain_msg_op, (const unsigned char*)cipher_msg, strlen((const char*)cipher_msg), (const unsigned char*)iv, &lea_key);
 
-	lea_cbc_dec((unsigned char*)plain_msg, (const unsigned char*)temp,
-		strlen(temp), (const unsigned char*)iv, &lea_key);
-
-	return plain_msg;
+	return plain_msg_op;
 
 }
 
 
-char* server::compare_pwd(char* input_pwd)
+bool compare_pwd(char* input_pwd)
 {
-	bool result = false;
+	static char temp[128] = { 0, };
 
-	static char* plain_pwd = decrypt_msg(input_pwd);
+	strcpy(temp, input_pwd);
 
-	if (strncmp(plain_pwd, PWD, strlen(PWD)) == 0)
+	if (strncmp(temp, (char*)PWD, strlen(PWD)) == 0)
 	{
-		return (char*)ALLO;
+		return true;;
 	}
-	else
-	{
-		return (char*)NOT_ALLO;
-	}
+
+	return false;
 
 }
 
 
-extern "C" SERVER_API char* server::test_string_3(char* temp) {
+char* test_string_3(char* temp) {
 	static char strTemp2[128] = { 0, };	//임시저장용 문자열
 	//sprintf_s(strTemp2, "%s strOnTest3 에서 리턴", temp);	//문자열 합치기
 	strcpy(strTemp2, temp);

@@ -13,6 +13,8 @@ using System.Runtime.InteropServices;
 
 namespace ChattingForm
 {
+
+
     static class Program
     {
         /// <summary>
@@ -29,17 +31,19 @@ namespace ChattingForm
 
     class handleClient
     {
-
-
-        //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr decrypt_msg(string cipher_msg);
-
+        // dll 가져오기
         [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void key_init();
 
-        //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr encrypt_msg(byte[] plain_msg);
+
+        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr decrypt_msg(byte[] cipher_msg);
+
+        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr compare_pwd(string input_pwd);
+        // dll 가져오기
 
         TcpClient clientSocket = null;
         public Dictionary<TcpClient, string> clientList = null;
@@ -63,41 +67,40 @@ namespace ChattingForm
         private void doChat()
         {
             NetworkStream stream = null;
+            key_init();
+
             try
             {
                 byte[] buffer = new byte[1024];
                 string msg = string.Empty;
                 int bytes = 0;
                 int MessageCount = 0;
-                key_init();
 
                 while (true)
                 {
                     MessageCount++;
                     stream = clientSocket.GetStream();
                     bytes = stream.Read(buffer, 0, buffer.Length);
-
                     msg = Encoding.Unicode.GetString(buffer, 0, bytes);
 
-                    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-                    IntPtr dec_ptr = decrypt_msg(msg);
+                    byte[] temp = new byte[16];
 
-                    string dec_msg = Marshal.PtrToStringAnsi(dec_ptr).TrimEnd('\0');
+                    temp = Encoding.UTF8.GetBytes(msg);
 
-                    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
+                    IntPtr hope = decrypt_msg(temp);
+                    byte[] hope_big = new byte[16];
+                    Marshal.Copy(hope, hope_big, 0, 16);
                     //msg = msg.Substring(0, msg.IndexOf("$"));
 
-                //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                    //for (int i = 0; i < temp.Length; i++)
+                    //{
+                    //    MessageBox.Show(i + " : " + temp[i]);
+                    //}
+
+                    string org_msg = Encoding.UTF8.GetString(hope_big);
+
                     if (OnReceived != null)
                         OnReceived(msg, clientList[clientSocket].ToString());
-                //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-                    //if (OnReceived != null)
-                    //    OnReceived(msg, clientList[clientSocket].ToString());
-
-
                 }
             }
             catch (SocketException err)

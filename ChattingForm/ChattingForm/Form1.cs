@@ -28,12 +28,13 @@ namespace ChattingForm
         public static extern IntPtr encrypt_msg(string plain_msg);
 
         [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr decrypt_msg(string cipher_msg);
+        public static extern IntPtr decrypt_msg(byte[] cipher_msg);
 
         [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern string compare_pwd(string input_pwd);
+        public static extern bool compare_pwd(string input_pwd);
+        // dll 가져오기
 
-//***************************************** 전역변수 설정(시작) *************************************************
+        //***************************************** 전역변수 설정(시작) *************************************************
 
         TcpListener server = null;
         TcpClient client = null;
@@ -49,23 +50,59 @@ namespace ChattingForm
             server = new TcpListener(InputIP, InputPort);
             client = default(TcpClient);
             server.Start();
-            this.OutputMSG.AppendText("[Connect Success] - Server Open\n");
+            //OutputMSG.AppendText("[Connect Success] - Server Open\n");
 
             while (true)
             {
                 try
                 {
                     counter++;
+                    //client = server.AcceptTcpClient();
+                    //OutputMSG.AppendText("[ Connecting... ]\n");
+
+                    //NetworkStream stream = client.GetStream();
+                    //stream.Flush();
+
                     client = server.AcceptTcpClient();
-                    this.OutputMSG.AppendText("[ Connecting... ]\n");
+                    OutputMSG.AppendText("[ Connecting... ]\n");
 
                     NetworkStream stream = client.GetStream();
+
+                    // pwd 체크
+                    //while (true)
+                    //{
+                    //    stream = client.GetStream();
+                    //    stream.Flush();
+
+                    //    stream.ReadTimeout = 10;
+                    //    byte[] pwd_read = new byte[1024];
+                    //    int read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+                    //    string org_pwd = Encoding.Unicode.GetString(pwd_read, 0, read_pwd_length);
+                    //    org_pwd = org_pwd.Substring(0, org_pwd.IndexOf("$"));
+
+                    //    if (compare_pwd(org_pwd))
+                    //    {
+                    //        string compare_correct = "OK$";
+                    //        byte[] compare_result = Encoding.Unicode.GetBytes(compare_correct);
+                    //        stream.Write(compare_result, 0, compare_result.Length);
+                    //        break;
+                    //    }
+                    //    else
+                    //    {
+                    //        stream.Flush();
+                    //    }
+
+
+                    //}  
+                    // pwd 체크
+
                     byte[] buffer = new byte[1024];
                     int bytes = stream.Read(buffer, 0, buffer.Length);
                     string user_name = Encoding.Unicode.GetString(buffer, 0, bytes);
                     user_name = user_name.Substring(0, user_name.IndexOf("$"));
 
                     clientList.Add(client, user_name);
+                    OutputMSG.AppendText("[ ID :"+ user_name+" ] - Join\n");
 
                     // send message all user
                     SendMessageAll("Welcome! \"" + user_name + "\", Hello! \n", "", false);
@@ -99,7 +136,7 @@ namespace ChattingForm
 
         private void OnReceived(string message, string user_name)
         {
-            string input_user_msg = "[" + user_name + "] pr1" + message;
+            string input_user_msg = "[" + user_name + "] " + message;
             DisplayText(input_user_msg);
             SendMessageAll(message, user_name, true);
         }
@@ -108,7 +145,7 @@ namespace ChattingForm
         {
             foreach (var pair in clientList)
             {
-                Trace.WriteLine(string.Format("tcpclient : {0} user_name : {1}", pair.Key, pair.Value));
+                Trace.WriteLine(string.Format("TCPclient : {0} User_ID : {1}", pair.Key, pair.Value));
 
                 TcpClient client = pair.Key as TcpClient;
                 NetworkStream stream = client.GetStream();
@@ -116,7 +153,7 @@ namespace ChattingForm
 
                 if (flag)
                 {
-                    buffer = Encoding.Unicode.GetBytes("[ " + user_name + " ] pr2" + message);
+                    buffer = Encoding.Unicode.GetBytes("[ " + user_name + " ]" + message);
                 }
                 else
                 {

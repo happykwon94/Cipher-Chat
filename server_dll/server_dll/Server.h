@@ -5,16 +5,16 @@
 #ifndef SERVER_EXPORTS
 #define SERVER_API __declspec(dllexport)
 
-namespace server{
+extern "C"{
 
-	extern "C" SERVER_API void key_init();
+	SERVER_API void key_init();
 
-	extern "C" SERVER_API char* encrypt_msg(char* plain_msg);
+	SERVER_API unsigned char* encrypt_msg(unsigned char* plain_msg);
 
-	extern "C" SERVER_API char* decrypt_msg(char* cipher_msg);
+	SERVER_API unsigned char* decrypt_msg(unsigned char* cipher_msg);
 
-	extern "C" SERVER_API char* compare_pwd(char* input_pwd);
+	SERVER_API bool compare_pwd(char* input_pwd);
 
-	extern "C" SERVER_API char* test_string_3(char* temp);
+	SERVER_API char* test_string_3(char* temp);
 }
 #endif
