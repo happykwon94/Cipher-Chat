@@ -82,8 +82,8 @@ namespace ClientForm
                             byte[] pwd_byte_array = new byte[pwd_size];
 
                             Marshal.Copy(pwd_ptr, pwd_byte_array, 0, pwd_byte_array.Length);
-
-                            stream.Write(pwd_byte_array, 0, pwd_byte_array.Length);
+                            if (stream.CanWrite)
+                                stream.Write(pwd_byte_array, 0, pwd_byte_array.Length);
 
                             stream.Flush();
 
@@ -129,7 +129,8 @@ namespace ClientForm
                     
                     //닉네임 설정
                     byte[] buffer = Encoding.Unicode.GetBytes(input_chat_name + "$");
-                    stream.Write(buffer, 0, buffer.Length);
+                    if(stream.CanWrite)
+                        stream.Write(buffer, 0, buffer.Length);
                     stream.Flush();
                     this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \""+ input_chat_name + "\"\n\n");
                     //닉네임 설정
@@ -155,7 +156,7 @@ namespace ClientForm
                     stream = client.GetStream();
                     int BUFFERSIZE = client.ReceiveBufferSize;
                     byte[] buffer = new byte[BUFFERSIZE];
-                    if (stream.DataAvailable)
+                    if (stream.CanRead)
                     {
                         int bytes = stream.Read(buffer, 0, buffer.Length);
                         OutputMsgPrint(buffer);
@@ -216,7 +217,8 @@ namespace ClientForm
             //string str = Encoding.UTF8.GetString(please);
 
             //byte[] buffer = Encoding.Unicode.GetBytes(str + "$");
-            stream.Write(please, 0, please.Length);
+            if (stream.CanWrite)
+                stream.Write(please, 0, please.Length);
             stream.Flush();
             this.InputMSG.Clear();
         }

@@ -63,8 +63,13 @@ namespace ChattingForm
                     // pwd 체크
                     while (true)
                     {
+                        if(client.Connected == false)
+                            client.Close();
                         byte[] pwd_read = new byte[1024];
-                        int read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+
+                        int read_pwd_length = 0;
+                        if (stream.CanRead)
+                            read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                         int input_pwd_size = 0;
                         IntPtr pwd_ptr = decrypt_msg(pwd_read, out input_pwd_size);
@@ -93,7 +98,10 @@ namespace ChattingForm
                     // pwd 체크
 
                     byte[] buffer = new byte[1024];
-                    int bytes = stream.Read(buffer, 0, buffer.Length);
+
+                    int bytes = 0;
+                    bytes = stream.Read(buffer, 0, buffer.Length);
+
                     string user_name = Encoding.Unicode.GetString(buffer, 0, bytes);
                     user_name = user_name.Substring(0, user_name.IndexOf("$"));
 
@@ -120,7 +128,6 @@ namespace ChattingForm
                     break;
                 }
             }
-            client.Close();
             server.Stop();
         }
 
@@ -291,7 +298,7 @@ namespace ChattingForm
                     IPAddress addr = IPAddress.Parse(input_ip);
                     int input_port = int.Parse(input_port_temp);
 
-                    Thread t = new Thread( () => InitSocket(addr, input_port) );
+                    Thread t = new Thread(() => InitSocket(addr, input_port));
                     t.IsBackground = true;
                     t.Start();
 
