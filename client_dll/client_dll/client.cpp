@@ -17,7 +17,7 @@ void key_init()
 	return ;
 }
 
-unsigned char* encrypt_msg(unsigned char* plain_msg)  // 암호화
+unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
 	unsigned char cipher_msg_op[255] = {};
@@ -34,6 +34,8 @@ unsigned char* encrypt_msg(unsigned char* plain_msg)  // 암호화
 
 	lea_cbc_enc(cipher_msg_op, (const unsigned char*)s_temp.c_str(),
 		s_temp.length(), (const unsigned char*)iv, &lea_key);
+
+	size = strlen((const char*)cipher_msg_op);
 	
 	return cipher_msg_op;
 }
@@ -42,12 +44,14 @@ unsigned char* encrypt_msg(unsigned char* plain_msg)  // 암호화
 
 //**********************************************************************************************************
 // 동작할 함수 작성
-unsigned char* decrypt_msg(unsigned char* cipher_msg)
+unsigned char* decrypt_msg(unsigned char* cipher_msg, int& size)
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
 	unsigned char plain_msg_op[255] = {};
 
 	lea_cbc_dec(plain_msg_op, (const unsigned char*)cipher_msg, strlen((const char*)cipher_msg), (const unsigned char*)iv, &lea_key);
+
+	size = strlen((const char*)plain_msg_op);
 
 	return plain_msg_op;
 }
@@ -77,9 +81,3 @@ bool recv_pwd_result_decrypt(char* input_pwd)
 }
 
 //**********************************************************************************************************
-char* test_string_3(char* temp) {
-	static char strTemp2[128] = { 0, };	//임시저장용 문자열
-	//sprintf_s(strTemp2, "%s strOnTest3 에서 리턴", temp);	//문자열 합치기
-	strcpy(strTemp2, temp);
-	return strTemp2;
-}

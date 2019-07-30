@@ -59,6 +59,7 @@
             this.InputMSG.Name = "InputMSG";
             this.InputMSG.Size = new System.Drawing.Size(325, 35);
             this.InputMSG.TabIndex = 4;
+            this.InputMSG.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputMsg_KeyDown);
             // 
             // SendButton
             // 
@@ -141,8 +142,7 @@
             this.Font = new System.Drawing.Font("굴림", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ChatForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Cipher-Talk (Server)";
+            this.Text = "Cipher-Chat (Server)";
             this.ResumeLayout(false);
             this.PerformLayout();
 

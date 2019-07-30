@@ -8,3 +8,4 @@ C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.cs
 C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.exe
 C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.pdb
 C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.ChatForm.resources
+C:\Users\komsco\source\repos\ChattingForm\ChattingForm\obj\Debug\ChattingForm.Form2.resources

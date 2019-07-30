@@ -9,7 +9,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Text;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+//using System.Runtime.InteropServices;
 
 namespace ChattingForm
 {
@@ -31,19 +31,6 @@ namespace ChattingForm
 
     class handleClient
     {
-        // dll 가져오기
-        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void key_init();
-
-        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr encrypt_msg(byte[] plain_msg);
-
-        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr decrypt_msg(byte[] cipher_msg);
-
-        [DllImport("server_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr compare_pwd(string input_pwd);
-        // dll 가져오기
 
         TcpClient clientSocket = null;
         public Dictionary<TcpClient, string> clientList = null;
@@ -58,7 +45,8 @@ namespace ChattingForm
             t_hanlder.Start();
         }
 
-        public delegate void MessageDisplayHandler(string message, string user_name);
+        //        public delegate void MessageDisplayHandler(string message, string user_name);
+        public delegate void MessageDisplayHandler(byte[] message, string user_name);
         public event MessageDisplayHandler OnReceived;
 
         public delegate void DisconnectedHandler(TcpClient clientSocket);
@@ -67,7 +55,6 @@ namespace ChattingForm
         private void doChat()
         {
             NetworkStream stream = null;
-            key_init();
 
             try
             {
@@ -81,31 +68,17 @@ namespace ChattingForm
                     MessageCount++;
                     stream = clientSocket.GetStream();
                     bytes = stream.Read(buffer, 0, buffer.Length);
-                    msg = Encoding.Unicode.GetString(buffer, 0, bytes);
-
-                    byte[] temp = new byte[16];
-
-                    temp = Encoding.UTF8.GetBytes(msg);
-
-                    IntPtr hope = decrypt_msg(temp);
-                    byte[] hope_big = new byte[16];
-                    Marshal.Copy(hope, hope_big, 0, 16);
+                    //msg = Encoding.Unicode.GetString(buffer, 0, bytes);
+                    msg = Encoding.UTF8.GetString(buffer, 0, bytes);
                     //msg = msg.Substring(0, msg.IndexOf("$"));
 
-                    //for (int i = 0; i < temp.Length; i++)
-                    //{
-                    //    MessageBox.Show(i + " : " + temp[i]);
-                    //}
-
-                    string org_msg = Encoding.UTF8.GetString(hope_big);
-
                     if (OnReceived != null)
-                        OnReceived(msg, clientList[clientSocket].ToString());
+                        OnReceived(buffer, clientList[clientSocket].ToString());
                 }
             }
             catch (SocketException err)
             {
-                Trace.WriteLine(string.Format("doChat - SocketException : {0}", err.Message));
+                Trace.WriteLine(string.Format("[ Error ] - SocketException : {0}", err.Message));
 
                 if (clientSocket != null)
                 {
@@ -118,7 +91,7 @@ namespace ChattingForm
             }
             catch (Exception err)
             {
-                Trace.WriteLine(string.Format("doChat - Exception : {0}", err.Message));
+                Trace.WriteLine(string.Format("[ Error ] - Exception : {0}", err.Message));
 
                 if (clientSocket != null)
                 {

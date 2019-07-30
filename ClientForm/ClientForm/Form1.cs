@@ -21,20 +21,10 @@ namespace ClientForm
         public static extern void key_init();
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr encrypt_msg(byte[] plain_msg);
+        public static extern IntPtr encrypt_msg(byte[] plain_msg, out int size);
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr decrypt_msg(byte[] cipher_msg);
-
-        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool recv_pwd_result_decrypt(string input_pwd);
-
-
-        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int decrypt_msg_int(byte[] input_pwd);
-
-        [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int encrypt_msg_int(byte[] input_pwd);
+        public static extern IntPtr decrypt_msg(byte[] cipher_msg, out int size);
         //**********************************************************************************************************************
 
         TcpClient client = new TcpClient();
@@ -68,40 +58,69 @@ namespace ClientForm
                     int input_port = int.Parse(input_port_temp);
                     client.Connect(IPAddress.Parse(input_ip), input_port);
                     stream = client.GetStream();
-                    // pwd 체크
-                    //while (true)
-                    //{
 
-                    //    // pwd 체크
-                    //    Form2 pwd_form = new Form2();
-
-                    //    pwd_form.ShowDialog();
-                    //    string input_pwd = pwd_form.PassPwd;
-
-                    //    byte[] pwd_write = Encoding.Unicode.GetBytes(input_pwd + "$");
-                    //    stream.Write(pwd_write, 0, pwd_write.Length);
-
-                    //    byte[] pwd_read = new byte[1024];
-                    //    if (stream.Read)
-                    //    {
-                    //        string pwd_result = Encoding.Unicode.GetString(pwd_read, 0, pwd_bytes);
-                    //        pwd_result = pwd_result.Substring(0, pwd_result.IndexOf("$"));
-
-                    //        if (recv_pwd_result_decrypt(pwd_result))
-                    //        {
-                    //            stream.Flush();
-                    //            break;
-                    //        }
-                    //    }
-                    //    client.Close();
-                    //}
-                    // pwd 체크
-
-                    this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
+                    Form2 pwd_form = new Form2();
 
                     this.InputIp.ReadOnly = true;
                     this.InputPort.ReadOnly = true;
-                    this.OpenButton.Enabled = false;
+
+                    // pwd 체크
+                    try
+                    {
+                        while (true)
+                        {
+                            pwd_form.ShowDialog();
+                            string input_pwd = pwd_form.PassPwd;
+
+                            byte[] pwd_write = Encoding.UTF8.GetBytes(input_pwd + "$");
+
+
+                            int pwd_size = 0;
+
+                            IntPtr pwd_ptr = encrypt_msg(pwd_write, out pwd_size);
+
+                            byte[] pwd_byte_array = new byte[pwd_size];
+
+                            Marshal.Copy(pwd_ptr, pwd_byte_array, 0, pwd_byte_array.Length);
+
+                            stream.Write(pwd_byte_array, 0, pwd_byte_array.Length);
+
+                            stream.Flush();
+
+
+                            byte[] result_read = new byte[1024];
+
+                            int read_pwd_length = 0;
+                            //stream.ReadTimeout = 5000;
+                            if (stream.CanRead)
+                                read_pwd_length = stream.Read(result_read, 0, result_read.Length);
+
+                            string org_pwd = Encoding.UTF8.GetString(result_read);
+
+                            org_pwd = org_pwd.Substring(0, org_pwd.IndexOf("$"));
+
+                            this.InputIp.ReadOnly = false;
+                            this.InputPort.ReadOnly = false;
+
+                            if (org_pwd == "OK")
+                            {
+                                this.InputIp.ReadOnly = true;
+                                this.InputPort.ReadOnly = true;
+                                this.OpenButton.Enabled = false;
+                                break;
+                            }
+
+
+                        }
+                    }
+                    catch (Exception err)
+                    {
+                        this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                    }
+
+                    // pwd 체크
+
+                    this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
 
                     Form3 name_set_form = new Form3();
                     name_set_form.ShowDialog();
@@ -129,63 +148,75 @@ namespace ClientForm
         //**********************************************************************************************************************
         private void RecvMsg()
         {
-            while (true)
+            try
             {
-                stream = client.GetStream();
-                int BUFFERSIZE = client.ReceiveBufferSize;
-                byte[] buffer = new byte[BUFFERSIZE];
-                int bytes = stream.Read(buffer, 0, buffer.Length);
+                while (true)
+                {
+                    stream = client.GetStream();
+                    int BUFFERSIZE = client.ReceiveBufferSize;
+                    byte[] buffer = new byte[BUFFERSIZE];
+                    if (stream.DataAvailable)
+                    {
+                        int bytes = stream.Read(buffer, 0, buffer.Length);
+                        OutputMsgPrint(buffer);
+                    }
+                    else
+                        continue;
+                    //string message = Encoding.Unicode.GetString(buffer, 0, bytes);
+                    //string message = Encoding.UTF8.GetString(buffer, 0, bytes);
+                }
+             }
 
-                string message = Encoding.Unicode.GetString(buffer, 0, bytes);
-                OutputMsgPrint(message);
+            catch (Exception err)
+            {
+                this.OutputMSG.AppendText("[Error] " + err + "\n\n");
             }
         }
 
-        private void OutputMsgPrint(string msg)
+        private void OutputMsgPrint(byte[] msg)
         {
+            int size_temp = 0;
+            IntPtr hope = decrypt_msg(msg, out size_temp);
+            byte[] hope_big = new byte[size_temp];
+            Marshal.Copy(hope, hope_big, 0, hope_big.Length);
+
+            string text = Encoding.UTF8.GetString(hope_big);
+
+            if (text.Contains("]"))
+            {
+                char sp = ']';
+                string[] user_data = text.Split(sp);
+                text = user_data[0]+"] "+ user_data[1];
+            }
+
             if (OutputMSG.InvokeRequired)
             {
                 OutputMSG.BeginInvoke(new MethodInvoker(delegate
                 {
-                    OutputMSG.AppendText(msg + Environment.NewLine);
+                    OutputMSG.AppendText(text + Environment.NewLine);
                 }));
             }
             else
-                OutputMSG.AppendText(msg + Environment.NewLine);
+                OutputMSG.AppendText(text + Environment.NewLine);
         }
+
         //**********************************************************************************************************************
 
 
         private void SendButton_Click(object sender, EventArgs e)
         {
-            //byte[] buffer = Encoding.Unicode.GetBytes(this.InputMSG.Text + "$");
-            //stream.Write(buffer, 0, buffer.Length);
-            //stream.Flush();
-            //this.InputMSG.Clear();
-
-            string org_msg = this.InputMSG.Text+"$";
-
-            MessageBox.Show("입력값 길이(length) : " + org_msg.Length);
-
-            byte[] please = new byte[16];
+            string org_msg = this.InputMSG.Text;
 
             byte[] enc_msg = Encoding.UTF8.GetBytes(org_msg);
-            IntPtr ptr = encrypt_msg(enc_msg);
-            Marshal.Copy(ptr, please, 0, 16);
+            int size = 0;
+            IntPtr ptr = encrypt_msg(enc_msg, out size);
+            byte[] please = new byte[size];
+            Marshal.Copy(ptr, please, 0, please.Length);
 
-            string str = Encoding.UTF8.GetString(please);
-            MessageBox.Show("str : " + str);
+            //string str = Encoding.UTF8.GetString(please);
 
-            //IntPtr hope = decrypt_msg(please);
-            //byte[] hope_big = new byte[16];
-            //Marshal.Copy(hope, hope_big, 0, 16);
-
-            //string believe = Encoding.UTF8.GetString(hope_big);
-
-            //MessageBox.Show("believe : " + believe);
-
-            byte[] buffer = Encoding.Unicode.GetBytes(str);
-            stream.Write(buffer, 0, buffer.Length);
+            //byte[] buffer = Encoding.Unicode.GetBytes(str + "$");
+            stream.Write(please, 0, please.Length);
             stream.Flush();
             this.InputMSG.Clear();
         }
@@ -195,6 +226,18 @@ namespace ClientForm
             if (e.KeyCode == Keys.Enter)
             {
                 OpenButton_Click(sender, e);
+            }
+        }
+
+        private void InputMsg_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter && e.Shift == true)
+            {
+                this.InputMSG.AppendText("\n");
+            }
+            else if (e.KeyCode == Keys.Enter)
+            {
+                SendButton_Click(sender, e);
             }
         }
     }

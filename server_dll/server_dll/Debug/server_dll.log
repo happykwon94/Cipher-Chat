@@ -5,29 +5,29 @@
 C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(22,1): warning C4996:  'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message :  'strcpy' 선언을 참조하십시오.
 C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(20,6): warning C4101:  'result_cipher' :참조되지 않은 지역 변수입니다.
-C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(53,1): warning C4996:  'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(56,1): warning C4996:  'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message :  'strcpy' 선언을 참조하십시오.
-C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(68,1): warning C4996:  'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(71,1): warning C4996:  'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   코드를 생성하고 있습니다...
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message :  'strcpy' 선언을 참조하십시오.
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message : C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(34) : warning C4172: 지역 변수 또는 임시: cipher_msg_op의 주소를 반환하고 있습니다.
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message : C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(44) : warning C4172: 지역 변수 또는 임시: plain_msg_op의 주소를 반환하고 있습니다.
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message : C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(36) : warning C4172: 지역 변수 또는 임시: cipher_msg_op의 주소를 반환하고 있습니다.
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt\string.h(133): message : C:\Users\komsco\source\repos\Server_dll\server_dll\Server.cpp(48) : warning C4172: 지역 변수 또는 임시: plain_msg_op의 주소를 반환하고 있습니다.
   libLEA.lib(lea_base.obj) : /GL로 컴파일한 MSIL .netmodule 또는 모듈이 있습니다. /LTCG를 지정하여 링크를 다시 시작하십시오. /LTCG를 링크 명령줄에 추가하면 링커 성능이 향상됩니다.
 LINK : warning LNK4075: '/INCREMENTAL'이(가) '/LTCG' 사양으로 인해 무시됩니다.
      C:\Users\komsco\source\repos\Server_dll\Debug\server_dll.lib 라이브러리 및 C:\Users\komsco\source\repos\Server_dll\Debug\server_dll.exp 개체를 생성하고 있습니다.
 LINK : warning LNK4098: 'LIBCMT' defaultlib가 다른 라이브러리와 충돌합니다. /NODEFAULTLIB:library를 사용하십시오.
   코드를 생성하고 있습니다.
   코드를 생성했습니다.
-libLEA.lib(lea_base.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_base.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_fallback.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_fallback.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_avx2_sse2.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_avx2_sse2.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_generic.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_generic.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_sse2.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_sse2.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_avx2_xop.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_avx2_xop.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_t_xop.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_t_xop.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_gcm_pclmul.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_gcm_pclmul.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_gcm_generic.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_gcm_generic.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(cpu_info_ia32.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(cpu_info_ia32.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_core.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_core.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
-libLEA.lib(lea_core_xop.obj) : warning LNK4099: '??????' PDB를 'libLEA.lib(lea_core_xop.obj)' 또는 '??????'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_base.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_base.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_t_fallback.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_t_fallback.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_t_avx2_sse2.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_t_avx2_sse2.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_t_generic.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_t_generic.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_t_sse2.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_t_sse2.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_t_avx2_xop.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_t_avx2_xop.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_t_xop.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_t_xop.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_gcm_pclmul.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_gcm_pclmul.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_gcm_generic.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_gcm_generic.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(cpu_info_ia32.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(cpu_info_ia32.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_core.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_core.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+libLEA.lib(lea_core_xop.obj) : warning LNK4099: '?殖???y' PDB를 'libLEA.lib(lea_core_xop.obj)' 또는 '?殖???y'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
   server_dll.vcxproj -> C:\Users\komsco\source\repos\Server_dll\Debug\server_dll.dll
