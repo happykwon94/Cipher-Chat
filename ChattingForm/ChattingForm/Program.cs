@@ -68,11 +68,18 @@ namespace ChattingForm
                     MessageCount++;
                     stream = clientSocket.GetStream();
                     if (stream.CanRead)
+                    {
                         bytes = stream.Read(buffer, 0, buffer.Length);
-                    msg = Encoding.UTF8.GetString(buffer, 0, bytes);
 
-                    if (OnReceived != null)
-                        OnReceived(buffer, clientList[clientSocket].ToString());
+                        byte[] temp = new byte[bytes];
+                        Array.Copy(buffer, temp, temp.Length);
+                        //msg = Encoding.UTF8.GetString(buffer, 0, bytes);
+
+                        if (OnReceived != null)
+                            OnReceived(temp, clientList[clientSocket].ToString());
+                    }
+                    else
+                        continue;
                 }
             }
             catch (SocketException err)

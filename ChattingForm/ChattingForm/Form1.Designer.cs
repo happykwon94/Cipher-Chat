@@ -42,14 +42,15 @@
             // OutputMSG
             // 
             this.OutputMSG.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.OutputMSG.Enabled = false;
+            this.OutputMSG.Cursor = System.Windows.Forms.Cursors.No;
             this.OutputMSG.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.OutputMSG.Location = new System.Drawing.Point(12, 67);
             this.OutputMSG.Multiline = true;
             this.OutputMSG.Name = "OutputMSG";
             this.OutputMSG.ReadOnly = true;
+            this.OutputMSG.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.OutputMSG.Size = new System.Drawing.Size(412, 488);
-            this.OutputMSG.TabIndex = 0;
+            this.OutputMSG.TabIndex = 10;
             // 
             // InputMSG
             // 
@@ -57,9 +58,11 @@
             this.InputMSG.Location = new System.Drawing.Point(12, 568);
             this.InputMSG.Multiline = true;
             this.InputMSG.Name = "InputMSG";
+            this.InputMSG.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.InputMSG.Size = new System.Drawing.Size(325, 35);
             this.InputMSG.TabIndex = 4;
             this.InputMSG.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputMsg_KeyDown);
+            this.InputMSG.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.InputMsg_Preview);
             // 
             // SendButton
             // 
@@ -83,7 +86,7 @@
             this.InputIp.Multiline = true;
             this.InputIp.Name = "InputIp";
             this.InputIp.Size = new System.Drawing.Size(219, 30);
-            this.InputIp.TabIndex = 1;
+            this.InputIp.TabIndex = 0;
             // 
             // InputPort
             // 
@@ -92,7 +95,7 @@
             this.InputPort.Multiline = true;
             this.InputPort.Name = "InputPort";
             this.InputPort.Size = new System.Drawing.Size(104, 30);
-            this.InputPort.TabIndex = 2;
+            this.InputPort.TabIndex = 1;
             this.InputPort.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputPort_KeyDown);
             // 
             // OpenButton
@@ -130,6 +133,7 @@
             // ChatForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(436, 615);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);

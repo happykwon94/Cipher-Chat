@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.Sockets;
@@ -45,10 +45,22 @@ namespace ChattingForm
 //######################################### 함수 설정 (시작) #####################################################
         private void InitSocket(IPAddress InputIP, int InputPort)
         {
+
             server = new TcpListener(InputIP, InputPort);
             client = default(TcpClient);
             server.Start();
-            OutputMSG.AppendText("[Connect Success] - Server Open\n");
+            DisplayText(Encoding.UTF8.GetBytes("[Connect Success] - Server Open\n$"),"");
+
+            Form2 pwd_form = new Form2();
+
+            pwd_form.ShowDialog();
+            pwd = pwd_form.PassPwd;
+
+            string sec = "";
+            for (int i = 0; i < pwd.Length - 1; i++)
+                sec += "*";
+
+            DisplayText(Encoding.UTF8.GetBytes("[PassWord Setting] - " + (pwd[0] + sec) + "\n$"), "");
 
             while (true)
             {
@@ -56,20 +68,22 @@ namespace ChattingForm
                 {
                     counter++;
                     client = server.AcceptTcpClient();
-                    OutputMSG.AppendText("[ Connecting... ]\n");
-
+                    DisplayText(Encoding.UTF8.GetBytes("[ Connecting... ]\n$"), "");
                     NetworkStream stream = client.GetStream();
 
                     // pwd 체크
                     while (true)
                     {
-                        if(client.Connected == false)
-                            client.Close();
                         byte[] pwd_read = new byte[1024];
 
+                        //stream = client.GetStream();
+
                         int read_pwd_length = 0;
-                        if (stream.CanRead)
+                        if(stream.CanRead)
                             read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+
+                        if (read_pwd_length == 0)
+                            continue;
 
                         int input_pwd_size = 0;
                         IntPtr pwd_ptr = decrypt_msg(pwd_read, out input_pwd_size);
@@ -78,10 +92,11 @@ namespace ChattingForm
 
                         string org_pwd = Encoding.UTF8.GetString(pwd_array);
                         org_pwd = org_pwd.Substring(0, org_pwd.IndexOf("$"));
+                        org_pwd = org_pwd.Substring(1);
 
                         if (pwd == org_pwd)
                         {
-                            string compare_correct = "OK$";
+                            string compare_correct = "|OK$";
                             byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
                             stream.Write(compare_result, 0, compare_result.Length);
                             stream.Flush();
@@ -89,7 +104,7 @@ namespace ChattingForm
                         }
                         else
                         {
-                            string compare_correct = "NOTOK$";
+                            string compare_correct = "|NOTOK$";
                             byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
                             stream.Write(compare_result, 0, compare_result.Length);
                             stream.Flush();
@@ -99,18 +114,16 @@ namespace ChattingForm
 
                     byte[] buffer = new byte[1024];
 
-                    int bytes = 0;
-                    bytes = stream.Read(buffer, 0, buffer.Length);
+                    int bytes = stream.Read(buffer, 0, buffer.Length);
 
                     string user_name = Encoding.Unicode.GetString(buffer, 0, bytes);
                     user_name = user_name.Substring(0, user_name.IndexOf("$"));
+                    user_name = user_name.Substring(1);
 
                     clientList.Add(client, user_name);
-                    OutputMSG.AppendText("[ ID :"+ user_name+" ] - Join\n");
-
-                    string temp = "Welcome! \"" + user_name + "\", Hello! \n";
-                    // send message all user
+                    string temp = "[ ID : " + user_name + " ] - Join!\n$";
                     SendMessageAll(Encoding.UTF8.GetBytes(temp), "", false);
+                    DisplayText(Encoding.UTF8.GetBytes(temp), "");
 
                     handleClient h_client = new handleClient();
                     h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
@@ -119,11 +132,19 @@ namespace ChattingForm
                 }
                 catch (SocketException err)
                 {
+                    if (client.Connected == false)
+                    {
+                        client.Close();
+                    }
                     Trace.WriteLine(string.Format("[ Socket Exception ] \n {0}", err.Message));
                     break;
                 }
                 catch (Exception err)
                 {
+                    if (client.Connected == false)
+                    {
+                        client.Close();
+                    }
                     Trace.WriteLine(string.Format("[ Error ] \n {0}", err.Message));
                     break;
                 }
@@ -135,139 +156,101 @@ namespace ChattingForm
         {
             if (clientList.ContainsKey(client))
                 clientList.Remove(client);
+            client.Close();
         }
-
-        //private void OnReceived(string message, string user_name)
-        //{
-        //    string input_user_msg = "[" + user_name + "] " + message;
-        //    // 복호화
-        //    MessageBox.Show("recv_server : "+ message);
-
-        //    DisplayText(input_user_msg);
-        //    SendMessageAll(message, user_name, true);
-        //}
 
         private void OnReceived(byte[] message, string user_name)
         {
-            string input_user_name = "[" + user_name + "]";
+            string input_user_name = "[" + user_name + "] ";
 
             int size = 0;
             IntPtr dec_ptr = decrypt_msg(message, out size);
             byte[] dec_msg = new byte[size];
             Marshal.Copy(dec_ptr, dec_msg, 0, dec_msg.Length);
 
-            DisplayText(dec_msg, input_user_name);
-            SendMessageAll(dec_msg, input_user_name, true);
+            string msg = Encoding.UTF8.GetString(dec_msg);
+
+            if (msg.Contains('|'))
+            {
+                msg = msg.Substring(1);
+            }
+
+            byte[] msg_array = Encoding.UTF8.GetBytes(msg);
+
+            DisplayText(msg_array, input_user_name);
+            SendMessageAll(msg_array, input_user_name, true);
         }
-
-        //public void SendMessageAll(string message, string user_name, bool flag)
-        //{
-        //    foreach (var pair in clientList)
-        //    {
-        //        Trace.WriteLine(string.Format("TCPclient : {0} User_ID : {1}", pair.Key, pair.Value));
-
-        //        TcpClient client = pair.Key as TcpClient;
-        //        NetworkStream stream = client.GetStream();
-        //        byte[] buffer = null;
-
-        //        if (flag)
-        //        {
-        //            buffer = Encoding.UTF8.GetBytes("[ " + user_name + " ]" + message);
-
-        //            //buffer = Encoding.Unicode.GetBytes("[ " + user_name + " ]" + message);
-        //        }
-        //        else
-        //        {
-        //            buffer = Encoding.UTF8.GetBytes(message);
-
-        //            // buffer = Encoding.Unicode.GetBytes(message);
-        //        }
-
-        //        stream.Write(buffer, 0, buffer.Length);
-        //        stream.Flush();
-        //    }
-        //}
-
 
         public void SendMessageAll(byte[] message, string user_name, bool flag)
         {
             foreach (var pair in clientList)
             {
-                Trace.WriteLine(string.Format("TCPclient : {0} User_ID : {1}", pair.Key, pair.Value));
-
                 TcpClient client = pair.Key as TcpClient;
                 NetworkStream stream = client.GetStream();
-                //byte[] buffer = null;
 
-                //
-                byte[] temp = Encoding.UTF8.GetBytes(user_name);
-                byte[] send_byte_array = new byte[temp.Length+message.Length];
+                if (user_name != "")
+                {
+                    Trace.WriteLine(string.Format("TCPclient : {0} User_ID : {1}", pair.Key, pair.Value));
 
-                Array.Copy(temp, send_byte_array, temp.Length);
-                Array.Copy(message, 0, send_byte_array, temp.Length, message.Length);
+                    byte[] temp = Encoding.UTF8.GetBytes(user_name);
+                    byte[] send_byte_array = new byte[temp.Length + message.Length];
 
-                string tester = Encoding.UTF8.GetString(send_byte_array);
+                    Array.Copy(temp, send_byte_array, temp.Length);
+                    Array.Copy(message, 0, send_byte_array, temp.Length, message.Length);
 
-                int size = 0;
-                IntPtr send_enc_ptr = encrypt_msg(send_byte_array, out size);
-                byte[] buffer = new byte[size];
-                Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+                    string tester = Encoding.UTF8.GetString(send_byte_array);
 
-                stream.Write(buffer, 0, buffer.Length);
-                stream.Flush();
+                    if (tester.Length == 0)
+                        continue;
+
+                    byte[] return_byte_array = Encoding.UTF8.GetBytes("|" + tester);
+
+                    int size = 0;
+                    IntPtr send_enc_ptr = encrypt_msg(return_byte_array, out size);
+                    byte[] buffer = new byte[size];
+                    Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+
+                    stream.Write(buffer, 0, buffer.Length);
+                    stream.Flush();
+                }
+                else
+                {
+                    int size = 0;
+                    IntPtr send_enc_ptr = encrypt_msg(message, out size);
+                    byte[] buffer = new byte[size];
+                    Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+
+                    stream.Write(buffer, 0, buffer.Length);
+                    stream.Flush();
+                }
             }
         }
-
-        //private void DisplayText(string text)
-        //{
-
-        //    string user_text = text.Substring(text.IndexOf("]") + 1, text.Length - (text.IndexOf("]") + 1));
-        //    //user_name = text.Substring(0, text.IndexOf("]"));
-
-        //    byte[] org_msg = Encoding.UTF8.GetBytes(user_text);
-
-        //    MessageBox.Show("text : " + user_text);
-
-        //    for(int i = 0; i< org_msg.Length; i++)
-        //    {
-        //        MessageBox.Show("서버 디스플레이 : "+i+" : "+org_msg[i]);
-        //    }
-
-        //    int size = 0;
-        //    IntPtr dec_ptr = decrypt_msg(org_msg, out size);
-        //    byte[] dec_msg = new byte[size];
-        //    Marshal.Copy(dec_ptr, dec_msg, 0, dec_msg.Length);
-
-        //    string msg = Encoding.UTF8.GetString(dec_msg); 
-
-        //    MessageBox.Show("msg : " + msg);
-
-        //    if (OutputMSG.InvokeRequired)
-        //    {
-        //        OutputMSG.BeginInvoke(new MethodInvoker(delegate
-        //        {
-        //            OutputMSG.AppendText(text + Environment.NewLine);
-        //        }));
-        //    }
-        //    else
-        //        OutputMSG.AppendText(text + Environment.NewLine);
-        //}
 
         private void DisplayText(byte[] text, string user_name)
         {
             string msg = Encoding.UTF8.GetString(text);
 
-            string print_msg = user_name + " " + msg;
+            string print_msg = user_name + msg;
+
+            if (print_msg.Contains("$"))
+            {
+                print_msg = print_msg.Substring(0, print_msg.IndexOf("$"));
+            }
+
+            if (msg.Contains('|'))
+            {
+                msg = msg.Substring(1);
+            }
 
             if (OutputMSG.InvokeRequired)
             { 
                 OutputMSG.BeginInvoke(new MethodInvoker(delegate
                 {
-                    OutputMSG.AppendText(print_msg + Environment.NewLine);
+                    this.OutputMSG.AppendText(print_msg + Environment.NewLine);
                 }));
             }
             else
-                OutputMSG.AppendText(print_msg + Environment.NewLine);
+                this.OutputMSG.AppendText(print_msg + "\n");
         }
 
         //######################################### 함수 설정 (끝) #####################################################
@@ -289,7 +272,6 @@ namespace ChattingForm
             {
                 MessageBox.Show("[ Input Error ]");
             }
-
             else
             {
                 try
@@ -305,17 +287,6 @@ namespace ChattingForm
                     this.InputIp.ReadOnly = true;
                     this.InputPort.ReadOnly = true;
                     this.OpenButton.Enabled = false;
-
-                    Form2 pwd_form = new Form2();
-
-                    pwd_form.ShowDialog();
-                    pwd = pwd_form.PassPwd;
-
-                    string sec = "";
-                    for (int i = 0; i < pwd.Length - 1; i++)
-                        sec += "*";
-
-                    this.OutputMSG.AppendText("[PassWord Setting] - " + (pwd[0]+ sec)+"\n");
                 }
                 catch (Exception err)
                 {
@@ -331,6 +302,16 @@ namespace ChattingForm
 
             if (msg == "")
                 MessageBox.Show("MSG error! ");
+            else if (msg.First() == '|')
+            {
+                MessageBox.Show("[First Char Error] ");
+                this.InputMSG.Text = "";
+            }
+            else if (msg.EndsWith("$"))
+            {
+                MessageBox.Show("[Last Char Error] ");
+                this.InputMSG.Text = "";
+            }
             else
             {
                 byte[] server_msg = Encoding.UTF8.GetBytes(msg);
@@ -353,16 +334,23 @@ namespace ChattingForm
 
         private void InputMsg_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter && e.Shift == true)
+            if (e.KeyCode == Keys.Enter && e.Shift == false)
+            {
+                SendButton_Click(sender, e);
+                this.InputMSG.Focus();
+                SendKeys.Send("{backspace}");
+            }
+
+        }
+
+            private void InputMsg_Preview(object sender, PreviewKeyDownEventArgs e)
+            {
+            if (e.Shift && e.KeyCode == Keys.Enter)
             {
                 this.InputMSG.AppendText("\n");
             }
-            else if (e.KeyCode == Keys.Enter)
-            {
-                SendButton_Click(sender, e);
-            }
         }
 
-        // ################################## 이벤트 처리(끝) ###############################################################
+        // ################################## 이벤트 처리(끝) #######f########################################################
     }
 }

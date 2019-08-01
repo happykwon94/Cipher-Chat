@@ -66,7 +66,7 @@
             this.OpenButton.Location = new System.Drawing.Point(348, 30);
             this.OpenButton.Name = "OpenButton";
             this.OpenButton.Size = new System.Drawing.Size(77, 31);
-            this.OpenButton.TabIndex = 11;
+            this.OpenButton.TabIndex = 2;
             this.OpenButton.Text = "Open";
             this.OpenButton.UseVisualStyleBackColor = true;
             this.OpenButton.Click += new System.EventHandler(this.OpenButton_Click);
@@ -78,7 +78,7 @@
             this.InputPort.Multiline = true;
             this.InputPort.Name = "InputPort";
             this.InputPort.Size = new System.Drawing.Size(104, 31);
-            this.InputPort.TabIndex = 10;
+            this.InputPort.TabIndex = 1;
             this.InputPort.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputPort_KeyDown);
             // 
             // InputIp
@@ -89,7 +89,7 @@
             this.InputIp.Multiline = true;
             this.InputIp.Name = "InputIp";
             this.InputIp.Size = new System.Drawing.Size(219, 31);
-            this.InputIp.TabIndex = 9;
+            this.InputIp.TabIndex = 0;
             // 
             // SendButton
             // 
@@ -100,7 +100,7 @@
             this.SendButton.Location = new System.Drawing.Point(343, 567);
             this.SendButton.Name = "SendButton";
             this.SendButton.Size = new System.Drawing.Size(81, 35);
-            this.SendButton.TabIndex = 13;
+            this.SendButton.TabIndex = 4;
             this.SendButton.Text = "Send";
             this.SendButton.UseVisualStyleBackColor = false;
             this.SendButton.Click += new System.EventHandler(this.SendButton_Click);
@@ -111,19 +111,22 @@
             this.InputMSG.Location = new System.Drawing.Point(12, 567);
             this.InputMSG.Multiline = true;
             this.InputMSG.Name = "InputMSG";
+            this.InputMSG.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.InputMSG.Size = new System.Drawing.Size(325, 35);
-            this.InputMSG.TabIndex = 12;
+            this.InputMSG.TabIndex = 3;
             this.InputMSG.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputMsg_KeyDown);
+            this.InputMSG.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.InputMsg_KeyPreview);
             // 
             // OutputMSG
             // 
             this.OutputMSG.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.OutputMSG.Enabled = false;
+            this.OutputMSG.Cursor = System.Windows.Forms.Cursors.No;
             this.OutputMSG.Font = new System.Drawing.Font("굴림", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.OutputMSG.Location = new System.Drawing.Point(12, 67);
             this.OutputMSG.Multiline = true;
             this.OutputMSG.Name = "OutputMSG";
             this.OutputMSG.ReadOnly = true;
+            this.OutputMSG.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.OutputMSG.Size = new System.Drawing.Size(412, 487);
             this.OutputMSG.TabIndex = 8;
             // 
@@ -131,6 +134,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(436, 615);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
