@@ -18,6 +18,7 @@ namespace ClientForm
 {
     public partial class Form1 : Form
     {
+
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void key_init();
 
@@ -58,30 +59,22 @@ namespace ClientForm
                     int input_port = int.Parse(input_port_temp);
                     client.Connect(IPAddress.Parse(input_ip), input_port);
 
-                    Form2 pwd_form = new Form2();
-
                     this.InputIp.ReadOnly = true;
                     this.InputPort.ReadOnly = true;
 
+                    Form2 pwd_form = new Form2();
                     pwd_form.ShowDialog();
+
                     string input_pwd = pwd_form.PassPwd;
+                    string send_pwd = "|" + input_pwd + "$";
 
-                    byte[] pwd_write = Encoding.UTF8.GetBytes("|"+input_pwd + "$");
-
-
-                    int pwd_size = 0;
-
-                    IntPtr pwd_ptr = encrypt_msg(pwd_write, out pwd_size);
-
-                    byte[] pwd_byte_array = new byte[pwd_size];
-
-                    Marshal.Copy(pwd_ptr, pwd_byte_array, 0, pwd_byte_array.Length);
+                    byte[] pwd_byte = EncryptMsg(send_pwd);
 
                     stream = client.GetStream();
 
-                    stream.Write(pwd_byte_array, 0, pwd_byte_array.Length);
+                    stream.Write(pwd_byte, 0, pwd_byte.Length);
                     stream.Flush();
-
+                    
                     // pwd 체크
                     try
                     {
@@ -91,8 +84,7 @@ namespace ClientForm
                             byte[] result_read = new byte[1024];
 
                             int read_pwd_length = 0;
-                            //stream.ReadTimeout = 10000;
-                            if (stream.DataAvailable)
+                            if (stream.CanRead)
                             {
                                 read_pwd_length = stream.Read(result_read, 0, result_read.Length);
                             }
@@ -100,14 +92,10 @@ namespace ClientForm
                             if (read_pwd_length == 0)
                                 continue;
 
-                            string org_pwd = Encoding.UTF8.GetString(result_read,0, read_pwd_length);
+                            string pwd_result = Encoding.UTF8.GetString(result_read,0, read_pwd_length);
+                            pwd_result = MakeOriginMsg(pwd_result);
 
-                            org_pwd = org_pwd.Substring(0, org_pwd.IndexOf("$"));
-
-                            this.InputIp.ReadOnly = false;
-                            this.InputPort.ReadOnly = false;
-
-                            if (org_pwd == "|OK")
+                            if (pwd_result == "OK")
                             {
                                 this.InputIp.ReadOnly = true;
                                 this.InputPort.ReadOnly = true;
@@ -116,46 +104,37 @@ namespace ClientForm
                             }
                             else
                             {
-                                pwd_form = new Form2();
-
-                                this.InputIp.ReadOnly = true;
-                                this.InputPort.ReadOnly = true;
+                                MessageBox.Show("[ 비밀번호 불일치 ]");
 
                                 pwd_form.ShowDialog();
                                 input_pwd = pwd_form.PassPwd;
 
-                                pwd_write = Encoding.UTF8.GetBytes("|" + input_pwd + "$");
+                                send_pwd = "|" + input_pwd + "$";
 
-
-                                pwd_size = 0;
-
-                                pwd_ptr = encrypt_msg(pwd_write, out pwd_size);
-
-                                pwd_byte_array = new byte[pwd_size];
-
-                                Marshal.Copy(pwd_ptr, pwd_byte_array, 0, pwd_byte_array.Length);
+                                pwd_byte = EncryptMsg(send_pwd);
 
                                 stream = client.GetStream();
 
-                                stream.Write(pwd_byte_array, 0, pwd_byte_array.Length);
+                                stream.Write(pwd_byte, 0, pwd_byte.Length);
                                 stream.Flush();
+                                
                             }
                         }
 
                         this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
 
+                        //닉네임 설정 <Start>
                         Form3 name_set_form = new Form3();
                         name_set_form.ShowDialog();
 
                         string input_chat_name = name_set_form.PassChatName;
 
-                        //닉네임 설정
                         byte[] buffer = Encoding.Unicode.GetBytes("|" + input_chat_name + "$");
                         if (stream.CanWrite)
                             stream.Write(buffer, 0, buffer.Length);
                         stream.Flush();
                         this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
-                        //닉네임 설정
+                        //닉네임 설정 <End>
 
                         Thread t_handler = new Thread(RecvMsg);
                         t_handler.IsBackground = true;
@@ -176,74 +155,94 @@ namespace ClientForm
 
         }
         //**********************************************************************************************************************
+        // 입력 받기
         private void RecvMsg()
         {
-            try
+            while (true)
             {
-                while (true)
+                try
                 {
                     stream = client.GetStream();
-                    //int BUFFERSIZE = client.ReceiveBufferSize;
-                    //byte[] buffer = new byte[BUFFERSIZE];
-                    byte[] buffer = new byte[1024];
 
-                    int bytes = 0;
+                    int BUFFERSIZE = client.ReceiveBufferSize;
 
-                    if (stream.CanRead)
-                        bytes = stream.Read(buffer, 0, buffer.Length);
+                    byte[] buffer = new byte[BUFFERSIZE];
 
-                    if (bytes == 0)
-                    {
+                    int bytes = stream.Read(buffer, 0, buffer.Length);
+
+                    if (bytes != 0)
+                        OutputMsgPrint(buffer);
+                    else
                         continue;
-                    }
-
-                    OutputMsgPrint(buffer);
                 }
-             }
 
-            catch (Exception err)
-            {
-                this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                catch (Exception err)
+                {
+                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                    break;
+                }
+
             }
         }
 
+        // OutputMsg에 출력
         private void OutputMsgPrint(byte[] msg)
         {
-            int size_temp = 0;
-            IntPtr hope = decrypt_msg(msg, out size_temp);
-            byte[] hope_big = new byte[size_temp];
-            Marshal.Copy(hope, hope_big, 0, hope_big.Length);
+            // 복호화
+            string text = DecryptMsg(msg);
 
-            string text = Encoding.UTF8.GetString(hope_big);
+            // 문자열에 시작과 끝 구분하고 
+            text = MakeOriginMsg(text);
 
-            if (text.Contains("$"))
-            {
-                text = text.Substring(0, text.IndexOf("$"));
-            }
-
-            if (text.Contains("|"))
-            {
-                text = text.Substring(1);
-            }
-
-            if (text.Contains("]"))
-            {
-                char sp = ']';
-                string[] user_data = text.Split(sp);
-                user_data[0] = user_data[0].Trim();
-                user_data[1] = user_data[1].Trim();
-                text = (user_data[0]+"] "+ user_data[1]);
-            }
-
+            // 출력하기
             if (OutputMSG.InvokeRequired)
             {
                 OutputMSG.BeginInvoke(new MethodInvoker(delegate
                 {
-                    OutputMSG.AppendText(text + "\n");
+                    OutputMSG.AppendText(text + Environment.NewLine);
                 }));
             }
             else
-                OutputMSG.AppendText(text + "\n");
+                OutputMSG.AppendText(text + Environment.NewLine);
+        }
+
+
+        private string DecryptMsg(byte[] msg)
+        {
+            int size = 0;
+            IntPtr send_enc_ptr = decrypt_msg(msg, out size);
+            byte[] buffer = new byte[size];
+            Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+
+            string msgToUTF8String = Encoding.UTF8.GetString(buffer);
+
+            return msgToUTF8String;
+        }
+        private string MakeOriginMsg(string msg)
+        {
+            if (msg.Contains("$"))
+            {
+                msg = msg.Substring(0, msg.IndexOf("$"));
+            }
+
+            if (msg.Contains("|"))
+            {
+                msg = msg.Substring(1);
+            }
+
+            return msg;
+        }
+
+        private byte[] EncryptMsg(string msg)
+        {
+            byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
+
+            int size = 0;
+            IntPtr send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
+            byte[] buffer = new byte[size];
+            Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+
+            return buffer;
         }
 
         //**********************************************************************************************************************
@@ -252,40 +251,33 @@ namespace ClientForm
         private void SendButton_Click(object sender, EventArgs e)
         {
             
-            string org_msg = "|" + this.InputMSG.Text;
+            string input_msg = this.InputMSG.Text;
 
-            if(String.IsNullOrWhiteSpace(this.InputMSG.Text))
+            // 입력 에러 체크
+            if(String.IsNullOrWhiteSpace(input_msg))
             {
                 MessageBox.Show("[Input Error]");
             }
-            else if (this.InputMSG.Text.First() == '|')
+            else if (input_msg.First() == '|')
             {
                 MessageBox.Show("[First Char Error] ");
                 this.InputMSG.Text = "";
             }
-            else if (this.InputMSG.Text.EndsWith("$"))
+            else if (input_msg.EndsWith("$"))
             {
                 MessageBox.Show("[Last Char Error] ");
                 this.InputMSG.Text = "";
             }
             else
             {
-                byte[] enc_msg = Encoding.UTF8.GetBytes(org_msg);
-                int size = 0;
-                IntPtr ptr = encrypt_msg(enc_msg, out size);
-                byte[] please = new byte[size];
-                Marshal.Copy(ptr, please, 0, size);
-               
-                while (true)
-                {
-                    if (size != 0)
-                    {
-                        stream.Write(please, 0, please.Length);
-                        stream.Flush();
-                        this.InputMSG.Text = "";
-                        break;
-                    }
-                }
+                input_msg = "|" + input_msg + "$";
+                // 암호화
+                byte[] send_byte_msg = EncryptMsg(input_msg);
+
+                //네트워크 스트림에 쓰기
+                stream.Write(send_byte_msg, 0, send_byte_msg.Length);
+                stream.Flush();
+                this.InputMSG.Text = "";
             }
         }
 

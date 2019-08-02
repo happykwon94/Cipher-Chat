@@ -37,118 +37,83 @@ namespace ChattingForm
         TcpClient client = null;
         static int counter = 0;
         string pwd = "";
+        bool flag = true;
+        bool userNameSetFlag = true;
 
         public Dictionary<TcpClient, string> clientList = new Dictionary<TcpClient, string>();
 
 //***************************************** 전역변수 설정(끝) ****************************************************
 
 //######################################### 함수 설정 (시작) #####################################################
-        private void InitSocket(IPAddress InputIP, int InputPort)
+        public void InitSocket(IPAddress InputIP, int InputPort)
         {
-
+           
             server = new TcpListener(InputIP, InputPort);
             client = default(TcpClient);
             server.Start();
-            DisplayText(Encoding.UTF8.GetBytes("[Connect Success] - Server Open\n$"),"");
 
-            Form2 pwd_form = new Form2();
+            DisplayText("[Connect Success] - Server Open\n");
 
-            pwd_form.ShowDialog();
-            pwd = pwd_form.PassPwd;
-
-            string sec = "";
-            for (int i = 0; i < pwd.Length - 1; i++)
-                sec += "*";
-
-            DisplayText(Encoding.UTF8.GetBytes("[PassWord Setting] - " + (pwd[0] + sec) + "\n$"), "");
+            SetPassword();
 
             while (true)
             {
+                counter++;
+                client = server.AcceptTcpClient();
+                NetworkStream stream = client.GetStream();
                 try
                 {
-                    counter++;
-                    client = server.AcceptTcpClient();
-                    DisplayText(Encoding.UTF8.GetBytes("[ Connecting... ]\n$"), "");
-                    NetworkStream stream = client.GetStream();
-
-                    // pwd 체크
-                    while (true)
+                    if (flag)
                     {
                         byte[] pwd_read = new byte[1024];
-
-                        //stream = client.GetStream();
-
                         int read_pwd_length = 0;
-                        if(stream.CanRead)
-                            read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+
+                        read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                         if (read_pwd_length == 0)
                             continue;
 
-                        int input_pwd_size = 0;
-                        IntPtr pwd_ptr = decrypt_msg(pwd_read, out input_pwd_size);
-                        byte[] pwd_array = new byte[input_pwd_size];
-                        Marshal.Copy(pwd_ptr, pwd_array, 0, pwd_array.Length);
+                        byte[] temp_arr = new byte[read_pwd_length];
+                        Array.Copy(pwd_read, temp_arr, read_pwd_length);
 
-                        string org_pwd = Encoding.UTF8.GetString(pwd_array);
-                        org_pwd = org_pwd.Substring(0, org_pwd.IndexOf("$"));
-                        org_pwd = org_pwd.Substring(1);
+                        string org_pwd = DecryptMsg(temp_arr);
 
-                        if (pwd == org_pwd)
+                        org_pwd = MakeOriginMsg(org_pwd);
+
+                        byte[] sendBuffer = PwdCheckFlag(org_pwd);
+
+                        stream.Write(sendBuffer, 0, sendBuffer.Length);
+                        stream.Flush();
+
+                        if (userNameSetFlag)
                         {
-                            string compare_correct = "|OK$";
-                            byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
-                            stream.Write(compare_result, 0, compare_result.Length);
-                            stream.Flush();
-                            break;
-                        }
-                        else
-                        {
-                            string compare_correct = "|NOTOK$";
-                            byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
-                            stream.Write(compare_result, 0, compare_result.Length);
-                            stream.Flush();
+                            byte[] buffer = new byte[1024];
+
+                            int bytes = stream.Read(buffer, 0, buffer.Length);
+
+                            string user_name = Encoding.Unicode.GetString(buffer, 0, bytes);
+                            user_name = MakeOriginMsg(user_name);
+
+                            UserNameCheck(user_name);
                         }
                     }
-                    // pwd 체크
 
-                    byte[] buffer = new byte[1024];
-
-                    int bytes = stream.Read(buffer, 0, buffer.Length);
-
-                    string user_name = Encoding.Unicode.GetString(buffer, 0, bytes);
-                    user_name = user_name.Substring(0, user_name.IndexOf("$"));
-                    user_name = user_name.Substring(1);
-
-                    clientList.Add(client, user_name);
-                    string temp = "[ ID : " + user_name + " ] - Join!\n$";
-                    SendMessageAll(Encoding.UTF8.GetBytes(temp), "", false);
-                    DisplayText(Encoding.UTF8.GetBytes(temp), "");
+                    DisplayText("[ Connect! client!]\n");
 
                     handleClient h_client = new handleClient();
                     h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
                     h_client.OnDisconnected += new handleClient.DisconnectedHandler(h_client_OnDisconnected);
                     h_client.startClient(client, clientList);
                 }
-                catch (SocketException err)
-                {
-                    if (client.Connected == false)
-                    {
-                        client.Close();
-                    }
-                    Trace.WriteLine(string.Format("[ Socket Exception ] \n {0}", err.Message));
-                    break;
-                }
                 catch (Exception err)
                 {
-                    if (client.Connected == false)
-                    {
-                        client.Close();
-                    }
                     Trace.WriteLine(string.Format("[ Error ] \n {0}", err.Message));
+
+                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
                     break;
                 }
             }
+            client.Close();
             server.Stop();
         }
 
@@ -163,94 +128,143 @@ namespace ChattingForm
         {
             string input_user_name = "[" + user_name + "] ";
 
-            int size = 0;
-            IntPtr dec_ptr = decrypt_msg(message, out size);
-            byte[] dec_msg = new byte[size];
-            Marshal.Copy(dec_ptr, dec_msg, 0, dec_msg.Length);
+            string input_user_msg = DecryptMsg(message);
+            input_user_msg = MakeOriginMsg(input_user_msg);
 
-            string msg = Encoding.UTF8.GetString(dec_msg);
+            string msg = input_user_name + input_user_msg;
 
-            if (msg.Contains('|'))
-            {
-                msg = msg.Substring(1);
-            }
-
-            byte[] msg_array = Encoding.UTF8.GetBytes(msg);
-
-            DisplayText(msg_array, input_user_name);
-            SendMessageAll(msg_array, input_user_name, true);
+            DisplayText(msg);
+            SendMessageAll(input_user_msg, input_user_name, true);
         }
 
-        public void SendMessageAll(byte[] message, string user_name, bool flag)
+        public void SendMessageAll(string message, string user_name, bool flag)
         {
-            foreach (var pair in clientList)
+            if (flag)
             {
-                TcpClient client = pair.Key as TcpClient;
-                NetworkStream stream = client.GetStream();
-
-                if (user_name != "")
+                foreach (var pair in clientList)
                 {
+                    TcpClient client = pair.Key as TcpClient;
+                    NetworkStream stream = client.GetStream();
+
                     Trace.WriteLine(string.Format("TCPclient : {0} User_ID : {1}", pair.Key, pair.Value));
 
-                    byte[] temp = Encoding.UTF8.GetBytes(user_name);
-                    byte[] send_byte_array = new byte[temp.Length + message.Length];
+                    string send_msg = "|" + user_name + message + "$";
 
-                    Array.Copy(temp, send_byte_array, temp.Length);
-                    Array.Copy(message, 0, send_byte_array, temp.Length, message.Length);
+                    byte[] send_byte = EncryptMsg(send_msg);
 
-                    string tester = Encoding.UTF8.GetString(send_byte_array);
-
-                    if (tester.Length == 0)
-                        continue;
-
-                    byte[] return_byte_array = Encoding.UTF8.GetBytes("|" + tester);
-
-                    int size = 0;
-                    IntPtr send_enc_ptr = encrypt_msg(return_byte_array, out size);
-                    byte[] buffer = new byte[size];
-                    Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
-
-                    stream.Write(buffer, 0, buffer.Length);
+                    stream.Write(send_byte, 0, send_byte.Length);
                     stream.Flush();
                 }
-                else
+            }
+            else
+            {
+                foreach (var pair in clientList)
                 {
-                    int size = 0;
-                    IntPtr send_enc_ptr = encrypt_msg(message, out size);
-                    byte[] buffer = new byte[size];
-                    Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+                    TcpClient client = pair.Key as TcpClient;
+                    NetworkStream stream = client.GetStream();
 
-                    stream.Write(buffer, 0, buffer.Length);
+                    message = "|" + message + "$";
+
+                    byte[] normal_text = EncryptMsg(message);
+
+                    stream.Write(normal_text, 0, normal_text.Length);
                     stream.Flush();
                 }
             }
         }
 
-        private void DisplayText(byte[] text, string user_name)
+        private void DisplayText(string text)
         {
-            string msg = Encoding.UTF8.GetString(text);
-
-            string print_msg = user_name + msg;
-
-            if (print_msg.Contains("$"))
-            {
-                print_msg = print_msg.Substring(0, print_msg.IndexOf("$"));
-            }
-
-            if (msg.Contains('|'))
-            {
-                msg = msg.Substring(1);
-            }
-
             if (OutputMSG.InvokeRequired)
-            { 
+            {
                 OutputMSG.BeginInvoke(new MethodInvoker(delegate
                 {
-                    this.OutputMSG.AppendText(print_msg + Environment.NewLine);
+                    this.OutputMSG.AppendText(text + Environment.NewLine);
                 }));
             }
             else
-                this.OutputMSG.AppendText(print_msg + "\n");
+                this.OutputMSG.AppendText(text + Environment.NewLine);
+        }
+
+        private byte[] EncryptMsg(string msg)
+        {
+            byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
+
+            int size = 0;
+            IntPtr send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
+            byte[] buffer = new byte[size];
+            Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+
+            return buffer;
+        }
+
+        private string DecryptMsg(byte[] msg)
+        {
+            int size = 0;
+            IntPtr send_enc_ptr = decrypt_msg(msg, out size);
+            byte[] buffer = new byte[size];
+            Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+
+            string msgToUTF8String = Encoding.UTF8.GetString(buffer);
+
+            return msgToUTF8String;
+        }
+
+        private void UserNameCheck(string userName)
+        {
+            clientList.Add(client, userName);
+            string temp = "[ ID : " + userName + " ] - Join!\n";
+
+            DisplayText(temp);
+            SendMessageAll(temp, "", false);
+
+            userNameSetFlag = false;
+        }
+
+        private string MakeOriginMsg(string msg)
+        {
+            if (msg.Contains("$"))
+            {
+                msg = msg.Substring(0, msg.IndexOf("$"));
+            }
+
+            if (msg.Contains("|"))
+            {
+                msg = msg.Substring(1);
+            }
+
+            return msg;
+        }
+
+        private byte[] PwdCheckFlag(string inputPwd)
+        {
+            if (pwd == inputPwd)
+            {
+                string compare_correct = "|OK$";
+                byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
+                flag = false;
+                return compare_result;
+            }
+            else
+            {
+                string compare_correct = "|NOTOK$";
+                byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
+                return compare_result;
+            }
+        }
+
+        private void SetPassword()
+        {
+            Form2 pwd_form = new Form2();
+
+            pwd_form.ShowDialog();
+            pwd = pwd_form.PassPwd;
+
+            string sec = "";
+            for (int i = 0; i < pwd.Length - 1; i++)
+                sec += "*";
+
+            DisplayText("[PassWord Setting] - " + (pwd[0] + sec) + "\n");
         }
 
         //######################################### 함수 설정 (끝) #####################################################
@@ -259,8 +273,8 @@ namespace ChattingForm
         // ################################## 이벤트 처리(시작) ###############################################################
         public ChatForm()
         {
-            key_init();
             InitializeComponent();
+            key_init();
         }
 
         private void OpenButton_Click(object sender, EventArgs e)
@@ -314,11 +328,10 @@ namespace ChattingForm
             }
             else
             {
-                byte[] server_msg = Encoding.UTF8.GetBytes(msg);
                 string server_name = "[ Server ] ";
 
-                DisplayText(server_msg, server_name);
-                SendMessageAll(server_msg, server_name, true);
+                DisplayText(server_name+msg);
+                SendMessageAll(msg, server_name, true);
 
                 this.InputMSG.Text = "";
             }
