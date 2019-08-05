@@ -37,8 +37,8 @@ namespace ChattingForm
         TcpClient client = null;
         static int counter = 0;
         string pwd = "";
-        bool flag = true;
-        bool userNameSetFlag = true;
+        bool flag;
+        bool userNameSetFlag;
 
         public Dictionary<TcpClient, string> clientList = new Dictionary<TcpClient, string>();
 
@@ -62,6 +62,8 @@ namespace ChattingForm
 
                 if(client.Connected)
                 {
+                    flag = true;
+                    userNameSetFlag = true;
                     Thread AcceptCL = new Thread(() => AcceptClient(client));
                     AcceptCL.IsBackground = true;
                     AcceptCL.Start();
