@@ -9,14 +9,12 @@ const char* iv = "internshipprog!";
 void key_init()
 {
 	lea_set_key(&lea_key, (const unsigned char*)iv, 16);
-
-	return;
 }
 
 unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	unsigned char cipher_msg_op[255] = {};
+	unsigned char cipher_msg_op[1024] = {0, };
 	int result_cipher[128];
 
 	strcpy(temp, (char*)plain_msg);
@@ -25,7 +23,7 @@ unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 
 	while (s_temp.length() % 16 != 0)
 	{
-		s_temp.append(" ");
+		s_temp += (char)" ";
 	}
 
 	lea_cbc_enc(cipher_msg_op, (const unsigned char*)s_temp.c_str(),
@@ -39,7 +37,7 @@ unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 unsigned char* decrypt_msg(unsigned char* cipher_msg, int& size)
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	unsigned char plain_msg_op[255] = {};
+	unsigned char plain_msg_op[1024] = { 0,  };
 
 	lea_cbc_dec(plain_msg_op, (const unsigned char*)cipher_msg, strlen((const char*)cipher_msg), (const unsigned char*)iv, &lea_key);
 
@@ -48,19 +46,4 @@ unsigned char* decrypt_msg(unsigned char* cipher_msg, int& size)
 	return plain_msg_op;
 }
 
-
-bool compare_pwd(char* input_pwd)
-{
-	static char temp[128] = { 0, };
-
-	strcpy(temp, input_pwd);
-
-	if (strncmp(temp, (char*)PWD, strlen(PWD)) == 0)
-	{
-		return true;;
-	}
-
-	return false;
-
-}
 

@@ -31,7 +31,6 @@ namespace ChattingForm
 
     class handleClient
     {
-
         TcpClient clientSocket = null;
         public Dictionary<TcpClient, string> clientList = null;
 
@@ -45,7 +44,6 @@ namespace ChattingForm
             t_hanlder.Start();
         }
 
-        //        public delegate void MessageDisplayHandler(string message, string user_name);
         public delegate void MessageDisplayHandler(byte[] message, string user_name);
         public event MessageDisplayHandler OnReceived;
 

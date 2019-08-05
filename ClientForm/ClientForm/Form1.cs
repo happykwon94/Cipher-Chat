@@ -19,6 +19,7 @@ namespace ClientForm
     public partial class Form1 : Form
     {
 
+        //******************************************** DLL 가져오기 *********************************************
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void key_init();
 
@@ -27,135 +28,19 @@ namespace ClientForm
 
         [DllImport("client_dll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr decrypt_msg(byte[] cipher_msg, out int size);
-        //**********************************************************************************************************************
+        //********************************************************************************************************
 
+
+        //***************************************** 전역변수 설정 ************************************************
         TcpClient client = new TcpClient();
         NetworkStream stream = default(NetworkStream);
 
-        //**********************************************************************************************************************
-        public Form1()
-        {
-            InitializeComponent();
-            key_init();
-        }
+        //********************************************************************************************************
+        
 
-        private void OpenButton_Click(object sender, EventArgs e)
-        {
-            string input_ip = this.InputIp.Text;
-            string input_port_temp = this.InputPort.Text;
-
-            if (String.IsNullOrWhiteSpace(input_ip) || String.IsNullOrWhiteSpace(input_port_temp))
-            {
-                MessageBox.Show("[ Input Error ]");
-
-                this.InputIp.Clear();
-                this.InputPort.Clear();
-            }
-
-            else
-            {
-                try
-                {
-                    int input_port = int.Parse(input_port_temp);
-                    client.Connect(IPAddress.Parse(input_ip), input_port);
-
-                    this.InputIp.ReadOnly = true;
-                    this.InputPort.ReadOnly = true;
-
-                    Form2 pwd_form = new Form2();
-                    pwd_form.ShowDialog();
-
-                    string input_pwd = pwd_form.PassPwd;
-                    string send_pwd = "|" + input_pwd + "$";
-
-                    byte[] pwd_byte = EncryptMsg(send_pwd);
-
-                    stream = client.GetStream();
-
-                    stream.Write(pwd_byte, 0, pwd_byte.Length);
-                    stream.Flush();
-                    
-                    // pwd 체크
-                    try
-                    {
-                        while (true)
-                        {
-
-                            byte[] result_read = new byte[1024];
-
-                            int read_pwd_length = 0;
-                            if (stream.CanRead)
-                            {
-                                read_pwd_length = stream.Read(result_read, 0, result_read.Length);
-                            }
-
-                            if (read_pwd_length == 0)
-                                continue;
-
-                            string pwd_result = Encoding.UTF8.GetString(result_read,0, read_pwd_length);
-                            pwd_result = MakeOriginMsg(pwd_result);
-
-                            if (pwd_result == "OK")
-                            {
-                                this.InputIp.ReadOnly = true;
-                                this.InputPort.ReadOnly = true;
-                                this.OpenButton.Enabled = false;
-                                break;
-                            }
-                            else
-                            {
-                                MessageBox.Show("[ 비밀번호 불일치 ]");
-
-                                pwd_form.ShowDialog();
-                                input_pwd = pwd_form.PassPwd;
-
-                                send_pwd = "|" + input_pwd + "$";
-
-                                pwd_byte = EncryptMsg(send_pwd);
-
-                                stream = client.GetStream();
-
-                                stream.Write(pwd_byte, 0, pwd_byte.Length);
-                                stream.Flush();
-                                
-                            }
-                        }
-
-                        this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
-
-                        //닉네임 설정 <Start>
-                        Form3 name_set_form = new Form3();
-                        name_set_form.ShowDialog();
-
-                        string input_chat_name = name_set_form.PassChatName;
-
-                        byte[] buffer = Encoding.Unicode.GetBytes("|" + input_chat_name + "$");
-                        if (stream.CanWrite)
-                            stream.Write(buffer, 0, buffer.Length);
-                        stream.Flush();
-                        this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
-                        //닉네임 설정 <End>
-
-                        Thread t_handler = new Thread(RecvMsg);
-                        t_handler.IsBackground = true;
-                        t_handler.Start();
-
-                    }
-                    catch (Exception err)
-                    {
-                        this.OutputMSG.AppendText("[Error] " + err + "\n\n");
-                    }
-
-                }
-                catch (Exception err)
-                {
-                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
-                }
-        }
-
-        }
-        //**********************************************************************************************************************
-        // 입력 받기
+        //*************************************** 함수 세팅 ******************************************************
+       
+        // 메세지가 들어올 때 처리
         private void RecvMsg()
         {
             while (true)
@@ -185,16 +70,20 @@ namespace ClientForm
             }
         }
 
-        // OutputMsg에 출력
+        // 클라이언트 출력창에 출력
         private void OutputMsgPrint(byte[] msg)
         {
-            // 복호화
             string text = DecryptMsg(msg);
 
-            // 문자열에 시작과 끝 구분하고 
             text = MakeOriginMsg(text);
 
-            // 출력하기
+            if(text == "<EndMsg>")
+            {
+                text = "---------- [ Server Close ] ----------";
+                stream.Close();
+                client.Close();
+            }
+
             if (OutputMSG.InvokeRequired)
             {
                 OutputMSG.BeginInvoke(new MethodInvoker(delegate
@@ -207,6 +96,7 @@ namespace ClientForm
         }
 
 
+        // 암호화
         private string DecryptMsg(byte[] msg)
         {
             int size = 0;
@@ -218,6 +108,8 @@ namespace ClientForm
 
             return msgToUTF8String;
         }
+
+        // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
         private string MakeOriginMsg(string msg)
         {
             if (msg.Contains("$"))
@@ -233,6 +125,24 @@ namespace ClientForm
             return msg;
         }
 
+        // 오류를 제거한 암호문을 만드는 함수
+        private byte[] MakeEncryptMsg(string msg)
+        {
+            msg = "|" + msg + "$ ";
+
+            byte[] send_byte_msg = EncryptMsg(msg);
+
+            while(send_byte_msg.Length < 16 || Encoding.UTF8.GetString(send_byte_msg).Contains("$") || Encoding.UTF8.GetString(send_byte_msg).Contains("|"))
+            {
+                msg = msg + "$";
+                // 암호화
+                send_byte_msg = EncryptMsg(msg);
+            }
+
+            return send_byte_msg;
+        }
+
+        // 암호화
         private byte[] EncryptMsg(string msg)
         {
             byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
@@ -245,9 +155,162 @@ namespace ClientForm
             return buffer;
         }
 
-        //**********************************************************************************************************************
+        // 비밀번호를 입력받는 함수
+        private byte[] InputPwd()
+        {
+            Form2 pwd_form = new Form2();
+            pwd_form.ShowDialog();
+
+            string input_pwd = pwd_form.PassPwd;
+
+            byte[] pwd_byte = MakeEncryptMsg(input_pwd);
+
+            return pwd_byte;
+        }
+
+        // 닉네임을 입력받는 함수
+        private byte[] InputChatName()
+        {
+            Form3 name_set_form = new Form3();
+            name_set_form.ShowDialog();
+
+            string input_chat_name = name_set_form.PassChatName;
+
+            byte[] buffer = Encoding.Unicode.GetBytes("|" + input_chat_name + "$");
+
+            this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
+
+            return buffer;
+        }
+
+        // 비밀번호 입력 결과를 확인하는 함수
+        private bool PwdCheckResult(byte[] result, int result_length)
+        {
+            bool return_result = false;
+
+            string pwd_result = Encoding.UTF8.GetString(result, 0, result_length);
+            pwd_result = MakeOriginMsg(pwd_result);
+
+            if (pwd_result == "OK")
+            {
+                this.InputIp.ReadOnly = true;
+                this.InputPort.ReadOnly = true;
+                this.OpenButton.Enabled = false;
+                return_result = true;
+            }
+            else
+            {
+                MessageBox.Show("[ 비밀번호 불일치 ]");
+            }
+
+            return return_result;
+        }
+
+        //********************************************************************************************************
 
 
+
+        //*************************************** 이벤트 처리 ****************************************************
+
+        // 폼이 로드될 때 이벤트
+        public Form1()
+        {
+            InitializeComponent();
+            key_init();
+        }
+
+        // 서버에 연결될 때 이벤트
+        private void OpenButton_Click(object sender, EventArgs e)
+        {
+            string input_ip = this.InputIp.Text;
+            string input_port_temp = this.InputPort.Text;
+
+            if (String.IsNullOrWhiteSpace(input_ip) || String.IsNullOrWhiteSpace(input_port_temp))
+            {
+                MessageBox.Show("[ Input Error ]");
+
+                this.InputIp.Clear();
+                this.InputPort.Clear();
+            }
+
+            else
+            {
+                try
+                {
+                    int input_port = int.Parse(input_port_temp);
+                    client.Connect(IPAddress.Parse(input_ip), input_port);
+
+                    this.InputIp.ReadOnly = true;
+                    this.InputPort.ReadOnly = true;
+
+                    byte[] pwd = InputPwd();
+
+                    stream = client.GetStream();
+
+                    stream.Write(pwd, 0, pwd.Length);
+                    stream.Flush();
+
+                    // pwd 체크
+                    try
+                    {
+                        while (true)
+                        {
+                            byte[] result_read = new byte[1024];
+
+                            int read_pwd_length = 0;
+                            if (stream.CanRead)
+                            {
+                                read_pwd_length = stream.Read(result_read, 0, result_read.Length);
+                            }
+
+                            if (read_pwd_length == 0)
+                                continue;
+
+                            if (PwdCheckResult(result_read, read_pwd_length))
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                pwd = InputPwd();
+
+                                stream = client.GetStream();
+
+                                stream.Write(pwd, 0, pwd.Length);
+                                stream.Flush();
+                            }
+
+                        }
+                        this.OutputMSG.Clear();
+                        this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
+
+                        //닉네임 설정 <Start>
+                        byte[] chatName = InputChatName();
+
+                        if (stream.CanWrite)
+                            stream.Write(chatName, 0, chatName.Length);
+                        stream.Flush();
+                        //닉네임 설정 <End>
+
+                        Thread t_handler = new Thread(RecvMsg);
+                        t_handler.IsBackground = true;
+                        t_handler.Start();
+
+                    }
+                    catch (Exception err)
+                    {
+                        this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                    }
+
+                }
+                catch (Exception err)
+                {
+                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                }
+            }
+        }
+
+        // 메세지 전송 시 이벤트
         private void SendButton_Click(object sender, EventArgs e)
         {
             
@@ -270,25 +333,27 @@ namespace ClientForm
             }
             else
             {
-                input_msg = "|" + input_msg + "$";
-                // 암호화
-                byte[] send_byte_msg = EncryptMsg(input_msg);
+                byte[] send_byte_msg = MakeEncryptMsg(input_msg);
 
-                //네트워크 스트림에 쓰기
                 stream.Write(send_byte_msg, 0, send_byte_msg.Length);
                 stream.Flush();
                 this.InputMSG.Text = "";
             }
         }
 
+        // 엔터키로 서버 접속
         private void InputPort_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
                 OpenButton_Click(sender, e);
+                this.InputPort.Focus();
+                SendKeys.Send("{backspace}");
+                SendKeys.Send("{Tab}");
             }
         }
 
+        // 쉬프트 + 엔터키로 줄바꿈
         private void InputMsg_KeyPreview(object sender, PreviewKeyDownEventArgs e)
         {
             if (e.Shift && e.KeyCode == Keys.Enter)
@@ -297,6 +362,7 @@ namespace ClientForm
             }
         }
 
+        // 엔터키로 메세지 전송
         private void InputMsg_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter && e.Shift == false)
@@ -304,7 +370,23 @@ namespace ClientForm
                 SendButton_Click(sender, e);
                 this.InputMSG.Focus();
                 SendKeys.Send("{backspace}");
+                this.ActiveControl = InputMSG;
             }
         }
+
+        // 클라이언트 종료시 이벤트
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            string end_msg = "<EndMsg>";
+            
+            byte[] send_byte_msg = MakeEncryptMsg(end_msg);
+
+            stream.Write(send_byte_msg, 0, send_byte_msg.Length);
+            stream.Flush();
+
+            client.Close();
+        }
+        //********************************************************************************************************
+
     }
 }

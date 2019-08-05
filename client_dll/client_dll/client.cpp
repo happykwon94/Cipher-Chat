@@ -13,14 +13,12 @@ const char* iv = "internshipprog!";
 void key_init()
 {
 	lea_set_key(&lea_key, (const unsigned char*)iv, 16);
-
-	return ;
 }
 
 unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	unsigned char cipher_msg_op[255] = {};
+	unsigned char cipher_msg_op[1024] = {};
 	int result_cipher[128];
 
 	strcpy(temp, (char*)plain_msg);
@@ -47,7 +45,7 @@ unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 unsigned char* decrypt_msg(unsigned char* cipher_msg, int& size)
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	unsigned char plain_msg_op[255] = {};
+	unsigned char plain_msg_op[1024] = {};
 
 	lea_cbc_dec(plain_msg_op, (const unsigned char*)cipher_msg, strlen((const char*)cipher_msg), (const unsigned char*)iv, &lea_key);
 
@@ -59,25 +57,5 @@ unsigned char* decrypt_msg(unsigned char* cipher_msg, int& size)
 //**********************************************************************************************************
 
 //**********************************************************************************************************
-// 비밀번호 확인
-bool recv_pwd_result_decrypt(char* input_pwd)
-{
-	static char temp[128] = { 0, };
-	bool result = false;
-
-	strcpy(temp, input_pwd);
-
-	if (strlen(input_pwd) < 0)
-	{
-		return result;
-	}
-
-	if (strncmp((char*)keyPWD, temp, strlen(keyPWD)) == 0)
-	{
-		result = true;
-	}
-
-	return result;
-}
 
 //**********************************************************************************************************
