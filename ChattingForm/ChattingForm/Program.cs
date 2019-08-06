@@ -47,7 +47,7 @@ namespace ChattingForm
         public delegate void MessageDisplayHandler(byte[] message, string user_name);
         public event MessageDisplayHandler OnReceived;
 
-        public delegate void DisconnectedHandler(TcpClient clientSocket);
+        public delegate void DisconnectedHandler(TcpClient clientSocket, string user_name);
         public event DisconnectedHandler OnDisconnected;
 
         private void doChat()
@@ -66,8 +66,10 @@ namespace ChattingForm
                     MessageCount++;
                     stream = clientSocket.GetStream();
 
-                    bytes = stream.Read(buffer, 0, buffer.Length);
-
+                    if (stream.CanRead)
+                        bytes = stream.Read(buffer, 0, buffer.Length);
+                    else
+                        continue;
                     byte[] temp = new byte[bytes];
                     Array.Copy(buffer, temp, temp.Length);
 
@@ -79,20 +81,24 @@ namespace ChattingForm
             {
                 Trace.WriteLine(string.Format("[ Error ] - SocketException : {0}", err.Message));
 
+                MessageBox.Show("[Socket Error] : " + err.Message);
+
                 if (clientSocket != null)
                 {
                     if (OnDisconnected != null)
-                        OnDisconnected(clientSocket);
+                        OnDisconnected(clientSocket, clientList[clientSocket].ToString());
                 }
             }
             catch (Exception err)
             {
                 Trace.WriteLine(string.Format("[ Error ] - Exception : {0}", err.Message));
 
+                MessageBox.Show("[Connect Error] : " + err.Message);
+
                 if (clientSocket != null)
                 {
                     if (OnDisconnected != null)
-                        OnDisconnected(clientSocket);
+                        OnDisconnected(clientSocket, clientList[clientSocket].ToString());
                 }
             }
         }

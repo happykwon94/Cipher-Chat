@@ -47,7 +47,8 @@ namespace ClientForm
             {
                 try
                 {
-                    stream = client.GetStream();
+                    if (client.Connected)
+                        stream = client.GetStream();
 
                     int BUFFERSIZE = client.ReceiveBufferSize;
 
@@ -63,7 +64,9 @@ namespace ClientForm
 
                 catch (Exception err)
                 {
-                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                    this.OutputMSG.AppendText("[Recv Error] " + err + "\n\n");
+                    client.Close();
+
                     break;
                 }
 
@@ -104,9 +107,11 @@ namespace ClientForm
             byte[] buffer = new byte[size];
             Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
 
-            string msgToUTF8String = Encoding.UTF8.GetString(buffer);
+            //string msgToUTF8String = Encoding.UTF8.GetString(buffer);
+            string msgToAnsiString = Encoding.Default.GetString(buffer);
 
-            return msgToUTF8String;
+
+            return msgToAnsiString;
         }
 
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
@@ -145,10 +150,11 @@ namespace ClientForm
         // 암호화
         private byte[] EncryptMsg(string msg)
         {
-            byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
+            //byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
+            byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
 
             int size = 0;
-            IntPtr send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
+            IntPtr send_enc_ptr = encrypt_msg(msgToAnsiByte, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
 
@@ -176,7 +182,7 @@ namespace ClientForm
 
             string input_chat_name = name_set_form.PassChatName;
 
-            byte[] buffer = Encoding.Unicode.GetBytes("<SOT>" + input_chat_name + "&");
+            byte[] buffer = MakeEncryptMsg(input_chat_name);
 
             this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
 
@@ -188,7 +194,9 @@ namespace ClientForm
         {
             bool return_result = false;
 
-            string pwd_result = Encoding.UTF8.GetString(result, 0, result_length);
+            //string pwd_result = Encoding.UTF8.GetString(result, 0, result_length);
+            string pwd_result = Encoding.Default.GetString(result, 0, result_length);
+
             pwd_result = MakeOriginMsg(pwd_result);
 
             if (pwd_result == "OK")
@@ -369,20 +377,14 @@ namespace ClientForm
             }
         }
 
-        // 클라이언트 종료시 이벤트
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        private void InputIp_KeyDown(object sender, KeyEventArgs e)
         {
-            string end_msg = "<EndMsg>";
-
-            byte[] send_byte_msg = MakeEncryptMsg(end_msg);
-
-            if (stream.CanWrite)
+            if (e.KeyCode == Keys.Enter && e.Shift == false)
             {
-                stream.Write(send_byte_msg, 0, send_byte_msg.Length);
-                stream.Flush();
+                SendButton_Click(sender, e);
+                this.InputIp.Focus();
+                SendKeys.Send("{backspace}");
             }
-
-            client.Close();
         }
         //********************************************************************************************************
 

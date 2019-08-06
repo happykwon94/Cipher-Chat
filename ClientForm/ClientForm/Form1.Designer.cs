@@ -90,6 +90,7 @@
             this.InputIp.Name = "InputIp";
             this.InputIp.Size = new System.Drawing.Size(219, 31);
             this.InputIp.TabIndex = 0;
+            this.InputIp.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputIp_KeyDown);
             // 
             // SendButton
             // 
@@ -148,7 +149,6 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Cipher-Chat (Client)";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 

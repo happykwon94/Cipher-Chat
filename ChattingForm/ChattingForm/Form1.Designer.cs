@@ -87,6 +87,7 @@
             this.InputIp.Name = "InputIp";
             this.InputIp.Size = new System.Drawing.Size(219, 30);
             this.InputIp.TabIndex = 0;
+            this.InputIp.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputIp_KeyDown);
             // 
             // InputPort
             // 
