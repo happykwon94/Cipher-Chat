@@ -18,8 +18,7 @@ void key_init()
 unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	unsigned char cipher_msg_op[1024] = {};
-	int result_cipher[128];
+	unsigned char cipher_msg_op[2048] = {0, };
 
 	strcpy(temp, (char*)plain_msg);
 
@@ -45,7 +44,7 @@ unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화
 unsigned char* decrypt_msg(unsigned char* cipher_msg, int& size)
 {
 	static char temp[128] = { 0, };	//임시저장용 문자열
-	unsigned char plain_msg_op[1024] = {};
+	unsigned char plain_msg_op[2048] = {0, };
 
 	lea_cbc_dec(plain_msg_op, (const unsigned char*)cipher_msg, strlen((const char*)cipher_msg), (const unsigned char*)iv, &lea_key);
 

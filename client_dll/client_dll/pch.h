@@ -16,6 +16,7 @@
 #include <thread>
 #include <string>
 #include <atlstr.h>
+#include <vector>
 
 #include "lea.h"
 
