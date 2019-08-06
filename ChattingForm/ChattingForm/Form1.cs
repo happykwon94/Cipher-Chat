@@ -60,13 +60,67 @@ namespace ChattingForm
                 counter++;
                 client = server.AcceptTcpClient();
 
-                if(client.Connected)
+                flag = true;
+                userNameSetFlag = true;
+                //Thread AcceptCL = new Thread(() => AcceptClient(client));
+                //AcceptCL.IsBackground = true;
+                //AcceptCL.Start();
+
+                NetworkStream stream = client.GetStream();
+
+                DisplayText("[ Connecting... ]\n");
+
+                try
                 {
-                    flag = true;
-                    userNameSetFlag = true;
-                    Thread AcceptCL = new Thread(() => AcceptClient(client));
-                    AcceptCL.IsBackground = true;
-                    AcceptCL.Start();
+                    // 비밀번호 입력받아서 대조
+                    while (flag)
+                    {
+                        byte[] pwd_read = new byte[1024];
+                        int read_pwd_length = 0;
+
+                        read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+
+                        if (read_pwd_length != 0)
+                        {
+                            byte[] temp_arr = new byte[read_pwd_length];
+                            Array.Copy(pwd_read, temp_arr, read_pwd_length);
+
+                            string org_pwd = DecryptMsg(temp_arr);
+
+                            org_pwd = MakeOriginMsg(org_pwd);
+
+                            byte[] sendBuffer = PwdCheckFlag(org_pwd);
+
+                            stream.Write(sendBuffer, 0, sendBuffer.Length);
+                            stream.Flush();
+                        }
+                    }
+
+                    // 닉네임 입력받아서 저장
+                    while (userNameSetFlag)
+                    {
+                        byte[] buffer = new byte[1024];
+
+                        int bytes = stream.Read(buffer, 0, buffer.Length);
+
+                        string user_name = Encoding.Unicode.GetString(buffer, 0, bytes);
+                        user_name = MakeOriginMsg(user_name);
+
+                        UserNameCheck(user_name);
+                    }
+
+                    // 클라이언트 동작
+                    handleClient h_client = new handleClient();
+                    h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
+                    h_client.OnDisconnected += new handleClient.DisconnectedHandler(h_client_OnDisconnected);
+                    h_client.startClient(client, clientList);
+                }
+                catch (Exception err)
+                {
+                    Trace.WriteLine(string.Format("[ Error ] \n {0}", err.Message));
+
+                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                    client.Close();
                 }
             }
             server.Stop();
@@ -249,14 +303,14 @@ namespace ChattingForm
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
         private string MakeOriginMsg(string msg)
         {
-            if (msg.Contains("$"))
+            if (msg.Contains("&")) //msg.Contains("$")
             {
-                msg = msg.Substring(0, msg.IndexOf("$"));
+                msg = msg.Substring(0, msg.IndexOf("&"));
             }
 
-            if (msg.Contains("|"))
+            if (msg.Contains("<SOT>")) //msg.Contains("|")
             {
-                msg = msg.Substring(1);
+                msg = msg.Substring(5);
             }
 
             return msg;
@@ -265,13 +319,13 @@ namespace ChattingForm
         // 오류를 제거한 암호문 만드는 함수
         private byte[] MakeEncryptMsg(string msg)
         {
-            msg = "|" + msg + "$$";
+            msg = "<SOT>" + msg + "&";
 
             byte[] send_byte_msg = EncryptMsg(msg);
 
-            while (send_byte_msg.Length < 16 || Encoding.UTF8.GetString(send_byte_msg).Contains("$") || Encoding.UTF8.GetString(send_byte_msg).Contains("|"))
+            while (send_byte_msg.Length < 16)
             {
-                msg = msg + "*";
+                msg = msg + "&";
                 // 암호화
                 send_byte_msg = EncryptMsg(msg);
             }
@@ -285,14 +339,14 @@ namespace ChattingForm
 
             if (pwd == inputPwd)
             {
-                string compare_correct = "|OK$";
+                string compare_correct = "<SOT>OK&";
                 byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
                 flag = false;
                 return compare_result;
             }
             else
             {
-                string compare_correct = "|NOTOK$";
+                string compare_correct = "<SOT>NOTOK&";
                 byte[] compare_result = Encoding.UTF8.GetBytes(compare_correct);
                 return compare_result;
             }
@@ -343,7 +397,7 @@ namespace ChattingForm
                     int input_port = int.Parse(input_port_temp);
 
                     Thread t = new Thread(() => InitSocket(addr, input_port));
-                    t.IsBackground = true;
+                    //t.IsBackground = true;
                     t.Start();
 
                     this.InputIp.ReadOnly = true;
@@ -365,16 +419,16 @@ namespace ChattingForm
 
             if (msg == "")
                 MessageBox.Show("MSG error! ");
-            else if (msg.First() == '|')
-            {
-                MessageBox.Show("[First Char Error] ");
-                this.InputMSG.Text = "";
-            }
-            else if (msg.EndsWith("$"))
-            {
-                MessageBox.Show("[Last Char Error] ");
-                this.InputMSG.Text = "";
-            }
+            //else if (msg.First() == '|')
+            //{
+            //    MessageBox.Show("[First Char Error] ");
+            //    this.InputMSG.Text = "";
+            //}
+            //else if (msg.EndsWith("$"))
+            //{
+            //    MessageBox.Show("[Last Char Error] ");
+            //    this.InputMSG.Text = "";
+            //}
             else
             {
                 string server_name = "[ Server ] ";
@@ -424,6 +478,19 @@ namespace ChattingForm
             string end_msg = "<EndMsg>";
 
             SendMessageAll(end_msg, "", false);
+
+            foreach (var pair in clientList)
+            {
+                TcpClient client = pair.Key as TcpClient;
+                NetworkStream stream = client.GetStream();
+
+                Trace.WriteLine(string.Format("TCPclient : {0} User_ID : {1}", pair.Key, pair.Value));
+
+                stream.Close();
+                client.Close();
+            }
+
+            server.Stop();
 
         }
 

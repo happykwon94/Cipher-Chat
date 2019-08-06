@@ -83,9 +83,6 @@ namespace ChattingForm
                 {
                     if (OnDisconnected != null)
                         OnDisconnected(clientSocket);
-
-                    clientSocket.Close();
-                    stream.Close();
                 }
             }
             catch (Exception err)
@@ -96,9 +93,6 @@ namespace ChattingForm
                 {
                     if (OnDisconnected != null)
                         OnDisconnected(clientSocket);
-
-                    clientSocket.Close();
-                    stream.Close();
                 }
             }
         }

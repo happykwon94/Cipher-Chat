@@ -112,14 +112,14 @@ namespace ClientForm
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
         private string MakeOriginMsg(string msg)
         {
-            if (msg.Contains("$"))
+            if (msg.Contains("&")) //msg.Contains("$")
             {
-                msg = msg.Substring(0, msg.IndexOf("$"));
+                msg = msg.Substring(0, msg.IndexOf("&"));
             }
 
-            if (msg.Contains("|"))
+            if (msg.Contains("<SOT>")) //msg.Contains("|")
             {
-                msg = msg.Substring(1);
+                msg = msg.Substring(5);
             }
 
             return msg;
@@ -128,13 +128,13 @@ namespace ClientForm
         // 오류를 제거한 암호문을 만드는 함수
         private byte[] MakeEncryptMsg(string msg)
         {
-            msg = "|" + msg + "$ ";
+            msg = "<SOT>" + msg + "&";
 
             byte[] send_byte_msg = EncryptMsg(msg);
 
-            while(send_byte_msg.Length < 16 || Encoding.UTF8.GetString(send_byte_msg).Contains("$") || Encoding.UTF8.GetString(send_byte_msg).Contains("|"))
+            while (send_byte_msg.Length < 16)
             {
-                msg = msg + "$";
+                msg = msg + "&";
                 // 암호화
                 send_byte_msg = EncryptMsg(msg);
             }
@@ -176,7 +176,7 @@ namespace ClientForm
 
             string input_chat_name = name_set_form.PassChatName;
 
-            byte[] buffer = Encoding.Unicode.GetBytes("|" + input_chat_name + "$");
+            byte[] buffer = Encoding.Unicode.GetBytes("<SOT>" + input_chat_name + "&");
 
             this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
 
@@ -299,13 +299,18 @@ namespace ClientForm
                     }
                     catch (Exception err)
                     {
-                        this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                        this.OutputMSG.AppendText("[Check Error] " + err + "\n\n");
+
+                        stream.Close();
+                        client.Close();
                     }
 
                 }
                 catch (Exception err)
                 {
-                    this.OutputMSG.AppendText("[Error] " + err + "\n\n");
+                    this.OutputMSG.AppendText("[Connect Error] " + err + "\n\n");
+                    stream.Close();
+                    client.Close();
                 }
             }
         }
@@ -320,16 +325,6 @@ namespace ClientForm
             if(String.IsNullOrWhiteSpace(input_msg))
             {
                 MessageBox.Show("[Input Error]");
-            }
-            else if (input_msg.First() == '|')
-            {
-                MessageBox.Show("[First Char Error] ");
-                this.InputMSG.Text = "";
-            }
-            else if (input_msg.EndsWith("$"))
-            {
-                MessageBox.Show("[Last Char Error] ");
-                this.InputMSG.Text = "";
             }
             else
             {
@@ -375,14 +370,17 @@ namespace ClientForm
         }
 
         // 클라이언트 종료시 이벤트
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             string end_msg = "<EndMsg>";
-            
+
             byte[] send_byte_msg = MakeEncryptMsg(end_msg);
 
-            stream.Write(send_byte_msg, 0, send_byte_msg.Length);
-            stream.Flush();
+            if (stream.CanWrite)
+            {
+                stream.Write(send_byte_msg, 0, send_byte_msg.Length);
+                stream.Flush();
+            }
 
             client.Close();
         }
