@@ -44,5 +44,10 @@ namespace ChattingForm
                 InputPwdButton_Click(sender, e);
             }
         }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+        }
     }
 }

@@ -376,6 +376,11 @@ namespace ChattingForm
             pwd_form.ShowDialog();
             pwd = pwd_form.PassPwd;
 
+            if(pwd == null)
+            {
+                MessageBox.Show("[Program Exit]");
+            }
+
             string sec = "";
             for (int i = 0; i < pwd.Length - 1; i++)
                 sec += "*";
@@ -417,8 +422,11 @@ namespace ChattingForm
                     tcp.Start();
 
                     this.InputIp.ReadOnly = true;
+                    this.InputIp.TabStop = false;
                     this.InputPort.ReadOnly = true;
+                    this.InputPort.TabStop = false;
                     this.OpenButton.Enabled = false;
+                    this.OpenButton.TabStop = false;
                 }
                 catch (Exception err)
                 {
@@ -465,13 +473,9 @@ namespace ChattingForm
                 SendButton_Click(sender, e);
                 this.InputMSG.Focus();
                 SendKeys.Send("{backspace}");
+                this.ActiveControl = InputMSG;
             }
 
-        }
-
-        // 쉬프트 + 엔터키로 줄 바꿈
-        private void InputMsg_Preview(object sender, PreviewKeyDownEventArgs e)
-        {
             if (e.Shift && e.KeyCode == Keys.Enter)
             {
                 this.InputMSG.AppendText("\n");

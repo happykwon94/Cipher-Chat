@@ -32,6 +32,7 @@
             this.Pwd = new System.Windows.Forms.Label();
             this.InputPwdButton = new System.Windows.Forms.Button();
             this.InputPwd = new System.Windows.Forms.TextBox();
+            this.CloseButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Pwd
@@ -48,7 +49,7 @@
             // 
             this.InputPwdButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.InputPwdButton.Font = new System.Drawing.Font("Arial Rounded MT Bold", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.InputPwdButton.Location = new System.Drawing.Point(141, 86);
+            this.InputPwdButton.Location = new System.Drawing.Point(56, 83);
             this.InputPwdButton.Name = "InputPwdButton";
             this.InputPwdButton.Size = new System.Drawing.Size(79, 29);
             this.InputPwdButton.TabIndex = 7;
@@ -66,11 +67,23 @@
             this.InputPwd.TabIndex = 6;
             this.InputPwd.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputPwd_KeyDown);
             // 
+            // CloseButton
+            // 
+            this.CloseButton.Font = new System.Drawing.Font("Arial Rounded MT Bold", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CloseButton.Location = new System.Drawing.Point(141, 83);
+            this.CloseButton.Name = "CloseButton";
+            this.CloseButton.Size = new System.Drawing.Size(79, 29);
+            this.CloseButton.TabIndex = 8;
+            this.CloseButton.Text = "Close";
+            this.CloseButton.UseVisualStyleBackColor = true;
+            this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(235, 134);
+            this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.Pwd);
             this.Controls.Add(this.InputPwdButton);
             this.Controls.Add(this.InputPwd);
@@ -88,5 +101,6 @@
         private System.Windows.Forms.Label Pwd;
         private System.Windows.Forms.Button InputPwdButton;
         private System.Windows.Forms.TextBox InputPwd;
+        private System.Windows.Forms.Button CloseButton;
     }
 }

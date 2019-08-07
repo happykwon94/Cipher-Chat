@@ -51,6 +51,7 @@
             this.OutputMSG.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.OutputMSG.Size = new System.Drawing.Size(412, 488);
             this.OutputMSG.TabIndex = 10;
+            this.OutputMSG.TabStop = false;
             // 
             // InputMSG
             // 
@@ -62,7 +63,6 @@
             this.InputMSG.Size = new System.Drawing.Size(325, 35);
             this.InputMSG.TabIndex = 4;
             this.InputMSG.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputMsg_KeyDown);
-            this.InputMSG.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.InputMsg_Preview);
             // 
             // SendButton
             // 

@@ -63,8 +63,7 @@ namespace ChattingForm
                 {
                     stream = clientSocket.GetStream();
 
-                    if (stream.CanRead)
-                        bytes = stream.Read(buffer, 0, buffer.Length);
+                    bytes = stream.Read(buffer, 0, buffer.Length);
 
                     if (bytes == 0)
                         continue;

@@ -236,7 +236,11 @@ namespace ClientForm
                     client.Connect(IPAddress.Parse(input_ip), input_port);
 
                     this.InputIp.ReadOnly = true;
+                    this.InputIp.TabStop = false;
                     this.InputPort.ReadOnly = true;
+                    this.InputPort.TabStop = false;
+                    this.OpenButton.Enabled = false;
+                    this.OpenButton.TabStop = false;
 
                     byte[] pwd = InputPwd();
 
@@ -343,14 +347,7 @@ namespace ClientForm
             }
         }
 
-        // 쉬프트 + 엔터키로 줄바꿈
-        private void InputMsg_KeyPreview(object sender, PreviewKeyDownEventArgs e)
-        {
-            if (e.Shift && e.KeyCode == Keys.Enter)
-            {
-                this.InputMSG.AppendText("\n");
-            }
-        }
+
 
         // 엔터키로 메세지 전송
         private void InputMsg_KeyDown(object sender, KeyEventArgs e)
@@ -361,6 +358,10 @@ namespace ClientForm
                 this.InputMSG.Focus();
                 SendKeys.Send("{backspace}");
                 this.ActiveControl = InputMSG;
+            }
+            if (e.Shift && e.KeyCode == Keys.Enter)
+            {
+                this.InputMSG.AppendText("\n");
             }
         }
 

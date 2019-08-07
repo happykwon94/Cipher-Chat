@@ -116,7 +116,6 @@
             this.InputMSG.Size = new System.Drawing.Size(325, 35);
             this.InputMSG.TabIndex = 3;
             this.InputMSG.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputMsg_KeyDown);
-            this.InputMSG.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.InputMsg_KeyPreview);
             // 
             // OutputMSG
             // 
@@ -130,6 +129,7 @@
             this.OutputMSG.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.OutputMSG.Size = new System.Drawing.Size(412, 487);
             this.OutputMSG.TabIndex = 8;
+            this.OutputMSG.TabStop = false;
             // 
             // Form1
             // 
