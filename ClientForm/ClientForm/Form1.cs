@@ -245,7 +245,6 @@ namespace ClientForm
 
                     stream = client.GetStream();
 
-                    stream.WriteTimeout = 1000;
                     stream.Write(pwd, 0, pwd.Length);
                     stream.Flush();
 
@@ -259,7 +258,6 @@ namespace ClientForm
                             int read_pwd_length = 0;
                             if (stream.CanRead)
                             {
-                                stream.ReadTimeout = 1000;
                                 read_pwd_length = stream.Read(result_read, 0, result_read.Length);
                             }
 
@@ -276,7 +274,6 @@ namespace ClientForm
 
                                 stream = client.GetStream();
 
-                                stream.WriteTimeout = 1000;
                                 stream.Write(pwd, 0, pwd.Length);
                                 stream.Flush();
                             }
@@ -290,7 +287,6 @@ namespace ClientForm
 
                         if (stream.CanWrite)
                         {
-                            stream.WriteTimeout = 1000;
                             stream.Write(chatName, 0, chatName.Length);
                             stream.Flush();
                         }
@@ -342,7 +338,6 @@ namespace ClientForm
 
                 //MessageBox.Show("text : "+ text);
 
-                stream.WriteTimeout = 1000;
                 stream.Write(send_byte_msg, 0, send_byte_msg.Length);
                 stream.Flush();
                 this.InputMSG.Text = "";

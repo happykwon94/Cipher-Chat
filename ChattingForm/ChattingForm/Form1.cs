@@ -86,7 +86,6 @@ namespace ChattingForm
                         byte[] pwd_read = new byte[1024];
                         int read_pwd_length = 0;
 
-                        stream.ReadTimeout = 1000;
                         read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                         if (read_pwd_length != 0)
@@ -100,7 +99,6 @@ namespace ChattingForm
 
                             byte[] sendBuffer = PwdCheckFlag(org_pwd);
 
-                            stream.WriteTimeout = 1000;
                             stream.Write(sendBuffer, 0, sendBuffer.Length);
                             stream.Flush();
                         }
@@ -111,7 +109,6 @@ namespace ChattingForm
                     {
                         byte[] buffer = new byte[1024];
 
-                        stream.ReadTimeout = 1000;
                         int bytes = stream.Read(buffer, 0, buffer.Length);
 
                         //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
@@ -170,7 +167,6 @@ namespace ChattingForm
                 byte[] pwd_read = new byte[1024];
                 int read_pwd_length = 0;
 
-                stream.ReadTimeout = 1000;
                 read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                 if (read_pwd_length != 0)
@@ -268,7 +264,6 @@ namespace ChattingForm
 
                     text = MakeOriginMsg(text);
 
-                    stream.WriteTimeout = 1000;
                     stream.Write(send_byte, 0, send_byte.Length);
                     stream.Flush();
                 }
@@ -282,7 +277,6 @@ namespace ChattingForm
 
                     byte[] normal_text = MakeEncryptMsg(message);
 
-                    stream.WriteTimeout = 1000;
                     stream.Write(normal_text, 0, normal_text.Length);
                     stream.Flush();
                 }
@@ -346,12 +340,12 @@ namespace ChattingForm
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
         private string MakeOriginMsg(string msg)
         {
-            if (msg.Contains("&")) //msg.Contains("$")
+            if (msg.Contains("&"))
             {
                 msg = msg.Substring(0, msg.IndexOf("&"));
             }
 
-            if (msg.Contains(">SOT<")) //msg.Contains("|")
+            if (msg.Contains(">SOT<"))
             {
                 msg = msg.Substring(5);
             }
@@ -425,14 +419,14 @@ namespace ChattingForm
                 for (int i = 0; i < pwd.Length - 1; i++)
                     sec += "*";
 
-                //this.InputIp.ReadOnly = true;
-                //this.InputIp.TabStop = false;
+                this.InputIp.ReadOnly = true;
+                this.InputIp.TabStop = false;
 
-                //this.InputPort.ReadOnly = true;
-                //this.InputPort.TabStop = false;
+                this.InputPort.ReadOnly = true;
+                this.InputPort.TabStop = false;
 
-                //this.OpenButton.Enabled = false;
-                //this.OpenButton.TabStop = false;
+                this.OpenButton.Enabled = false;
+                this.OpenButton.TabStop = false;
 
                 DisplayText("[PassWord Setting] - " + (pwd[0] + sec) + "\n");
             }
