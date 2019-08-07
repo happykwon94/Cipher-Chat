@@ -35,6 +35,10 @@ namespace ChattingForm
 
         TcpListener server = null;
         TcpClient client = null;
+
+        IntPtr send_enc_ptr;
+        IntPtr send_dec_ptr;
+
         string pwd = "";
         bool flag;
         bool userNameSetFlag;
@@ -135,14 +139,14 @@ namespace ChattingForm
                     Trace.WriteLine(string.Format("[ Server SocketException Error ] \n {0}", err.Message));
 
                     this.OutputMSG.AppendText("[ Server SocketException Error] " + err + "\n\n");
-                    client.Close();
+                    ServerClose();
                 }
                 catch(Exception err)
                 {
                     Trace.WriteLine(string.Format("[ Server Exception Error ] \n {0}", err.Message));
 
                     this.OutputMSG.AppendText("[ Server Exception Error] " + err + "\n\n");
-                    client.Close();
+                    ServerClose();
                 }
             }
         }
@@ -295,7 +299,7 @@ namespace ChattingForm
             byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
 
             int size = 0;
-            IntPtr send_enc_ptr = encrypt_msg(msgToAnsiByte, out size);
+            send_enc_ptr = encrypt_msg(msgToAnsiByte, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
 
@@ -306,9 +310,9 @@ namespace ChattingForm
         private string DecryptMsg(byte[] msg)
         {
             int size = 0;
-            IntPtr send_enc_ptr = decrypt_msg(msg, out size);
+            send_dec_ptr = decrypt_msg(msg, out size);
             byte[] buffer = new byte[size];
-            Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+            Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
 
             //string msgToUTF8String = Encoding.UTF8.GetString(buffer);
             string msgToAnsiString = Encoding.Default.GetString(buffer);
@@ -425,6 +429,27 @@ namespace ChattingForm
             return result;
         }
 
+        private void ServerClose()
+        {
+            string end_msg = "<EndMsg>";
+
+            SendMessageAll(end_msg, "", false);
+
+            if (client != null)
+            {
+                client.Close();
+                client = null;
+            }
+
+            if (server != null)
+            {
+                server.Stop();
+                Marshal.FreeHGlobal(send_enc_ptr);
+                Marshal.FreeHGlobal(send_dec_ptr);
+                server = null;
+            }
+        }
+
         //######################################### 함수 설정 (끝) #####################################################
 
 
@@ -491,6 +516,7 @@ namespace ChattingForm
             {
                 OpenButton_Click(sender, e);
                 this.InputPort.Focus();
+                SendKeys.Send("{backspace}");
                 SendKeys.Send("{Tab}");
             }
         }
@@ -515,21 +541,7 @@ namespace ChattingForm
         // 서버 닫힐 때 이벤트
         private void ChatForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            string end_msg = "<EndMsg>";
-
-            SendMessageAll(end_msg, "", false);
-
-            if (client != null)
-            {
-                client.Close();
-                client = null;
-            }
-
-            if (server != null)
-            {
-                server.Stop();
-                server = null;
-            }
+            ServerClose();
         }
 
         private void InputIp_KeyDown(object sender, KeyEventArgs e)

@@ -35,11 +35,14 @@ namespace ClientForm
         TcpClient client = new TcpClient();
         NetworkStream stream = default(NetworkStream);
 
+        IntPtr send_enc_ptr;
+        IntPtr send_dec_ptr;
+
         //********************************************************************************************************
-        
+
 
         //*************************************** 함수 세팅 ******************************************************
-       
+
         // 메세지가 들어올 때 처리
         private void RecvMsg()
         {
@@ -90,13 +93,12 @@ namespace ClientForm
         private string DecryptMsg(byte[] msg)
         {
             int size = 0;
-            IntPtr send_enc_ptr = decrypt_msg(msg, out size);
+            send_dec_ptr = decrypt_msg(msg, out size);
             byte[] buffer = new byte[size];
-            Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
+            Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
 
             //string msgToUTF8String = Encoding.UTF8.GetString(buffer);
             string msgToAnsiString = Encoding.Default.GetString(buffer);
-
 
             return msgToAnsiString;
         }
@@ -141,7 +143,7 @@ namespace ClientForm
             byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
 
             int size = 0;
-            IntPtr send_enc_ptr = encrypt_msg(msgToAnsiByte, out size);
+            send_enc_ptr = encrypt_msg(msgToAnsiByte, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
 
