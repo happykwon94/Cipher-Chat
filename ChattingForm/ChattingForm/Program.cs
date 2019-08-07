@@ -61,7 +61,10 @@ namespace ChattingForm
 
                 while (true)
                 {
-                    stream = clientSocket.GetStream();
+                    if (clientSocket.Connected)
+                        stream = clientSocket.GetStream();
+                    else
+                        continue;
 
                     bytes = stream.Read(buffer, 0, buffer.Length);
 
@@ -79,8 +82,6 @@ namespace ChattingForm
             {
                 Trace.WriteLine(string.Format("[ Error ] - SocketException : {0}", err.Message));
 
-                MessageBox.Show("[Socket Error] : " + err.Message);
-
                 if (clientSocket != null)
                 {
                     OnDisconnected(clientSocket, clientList[clientSocket].ToString());
@@ -89,9 +90,6 @@ namespace ChattingForm
             catch (Exception err)
             {
                 Trace.WriteLine(string.Format("[ Error ] - Exception : {0}", err.Message));
-
-                MessageBox.Show("[Connect Error] : " + err.Message);
-
                 if (clientSocket != null)
                 {
                     OnDisconnected(clientSocket, clientList[clientSocket].ToString());

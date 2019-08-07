@@ -35,10 +35,10 @@ namespace ChattingForm
 
         TcpListener server = null;
         TcpClient client = null;
-        static int counter = 0;
         string pwd = "";
         bool flag;
         bool userNameSetFlag;
+        bool pwdSetFlag;
 
         public Dictionary<TcpClient, string> clientList = new Dictionary<TcpClient, string>();
 
@@ -55,15 +55,19 @@ namespace ChattingForm
 
             DisplayText("[Connect Success] - Server Open\n");
 
-            SetPassword();
+            pwdSetFlag = SetPassword();
 
             while (true)
             {
-                counter++;
                 try
                 {
-                    client = server.AcceptTcpClient();
+                    if (!pwdSetFlag)
+                    {
+                        pwdSetFlag = SetPassword();
+                        continue;
+                    }
 
+                    client = server.AcceptTcpClient();
 
                     flag = true;
                     userNameSetFlag = true;
@@ -226,8 +230,15 @@ namespace ChattingForm
 
             string msg = input_user_name + input_user_msg;
 
-            DisplayText(msg);
-            SendMessageAll(input_user_msg, input_user_name, true);
+            if(input_user_msg == "<End Msg>")
+            {
+                h_client_OnDisconnected(client, user_name);
+            }
+            else
+            {
+                DisplayText(msg);
+                SendMessageAll(input_user_msg, input_user_name, true);
+            }
         }
 
         // 연결된 클라이언트에 메세지 전체 전달
@@ -369,8 +380,10 @@ namespace ChattingForm
         }
 
         // 비밀번호를 설정하는 함수
-        private void SetPassword()
+        private bool SetPassword()
         {
+            bool result = true;
+
             Form2 pwd_form = new Form2();
 
             pwd_form.ShowDialog();
@@ -379,13 +392,37 @@ namespace ChattingForm
             if(pwd == null)
             {
                 MessageBox.Show("[Program Exit]");
+
+                this.InputIp.ReadOnly = false;
+                this.InputIp.TabStop = true;
+
+                this.InputPort.ReadOnly = false;
+                this.InputPort.TabStop = true;
+
+                this.OpenButton.Enabled = true;
+                this.OpenButton.TabStop = true;
+
+                result = false;
+            }
+            else
+            {
+                string sec = "";
+                for (int i = 0; i < pwd.Length - 1; i++)
+                    sec += "*";
+
+                this.InputIp.ReadOnly = true;
+                this.InputIp.TabStop = false;
+
+                this.InputPort.ReadOnly = true;
+                this.InputPort.TabStop = false;
+
+                this.OpenButton.Enabled = false;
+                this.OpenButton.TabStop = false;
+
+                DisplayText("[PassWord Setting] - " + (pwd[0] + sec) + "\n");
             }
 
-            string sec = "";
-            for (int i = 0; i < pwd.Length - 1; i++)
-                sec += "*";
-
-            DisplayText("[PassWord Setting] - " + (pwd[0] + sec) + "\n");
+            return result;
         }
 
         //######################################### 함수 설정 (끝) #####################################################
@@ -420,13 +457,6 @@ namespace ChattingForm
                     Thread tcp = new Thread(() => InitSocket(addr, input_port));
                     tcp.IsBackground = true;
                     tcp.Start();
-
-                    this.InputIp.ReadOnly = true;
-                    this.InputIp.TabStop = false;
-                    this.InputPort.ReadOnly = true;
-                    this.InputPort.TabStop = false;
-                    this.OpenButton.Enabled = false;
-                    this.OpenButton.TabStop = false;
                 }
                 catch (Exception err)
                 {

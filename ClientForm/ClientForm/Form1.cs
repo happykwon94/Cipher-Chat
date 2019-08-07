@@ -377,6 +377,11 @@ namespace ClientForm
 
         private void FormClosing_Event(object sender, FormClosingEventArgs e)
         {
+            byte[] send_byte_msg = MakeEncryptMsg("<End Msg>");
+
+            stream.Write(send_byte_msg, 0, send_byte_msg.Length);
+            stream.Flush();
+
             if (client != null)
                 client.Close();
         }

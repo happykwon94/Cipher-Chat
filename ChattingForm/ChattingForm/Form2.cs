@@ -47,6 +47,7 @@ namespace ChattingForm
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
+            PassPwd = null;
             this.Hide();
         }
     }
