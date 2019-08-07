@@ -36,13 +36,11 @@ namespace ChattingForm
         TcpListener server = null;
         TcpClient client = null;
 
-        IntPtr send_enc_ptr;
-        IntPtr send_dec_ptr;
-
         string pwd = "";
         bool flag;
         bool userNameSetFlag;
         bool pwdSetFlag;
+        static int count = 0;
 
         public Dictionary<TcpClient, string> clientList = new Dictionary<TcpClient, string>();
 
@@ -72,6 +70,7 @@ namespace ChattingForm
                     }
 
                     client = server.AcceptTcpClient();
+                    count++;
 
                     flag = true;
                     userNameSetFlag = true;
@@ -87,6 +86,7 @@ namespace ChattingForm
                         byte[] pwd_read = new byte[1024];
                         int read_pwd_length = 0;
 
+                        stream.ReadTimeout = 1000;
                         read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                         if (read_pwd_length != 0)
@@ -100,6 +100,7 @@ namespace ChattingForm
 
                             byte[] sendBuffer = PwdCheckFlag(org_pwd);
 
+                            stream.WriteTimeout = 1000;
                             stream.Write(sendBuffer, 0, sendBuffer.Length);
                             stream.Flush();
                         }
@@ -110,6 +111,7 @@ namespace ChattingForm
                     {
                         byte[] buffer = new byte[1024];
 
+                        stream.ReadTimeout = 1000;
                         int bytes = stream.Read(buffer, 0, buffer.Length);
 
                         //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
@@ -168,6 +170,7 @@ namespace ChattingForm
                 byte[] pwd_read = new byte[1024];
                 int read_pwd_length = 0;
 
+                stream.ReadTimeout = 1000;
                 read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                 if (read_pwd_length != 0)
@@ -181,6 +184,7 @@ namespace ChattingForm
 
                     byte[] sendBuffer = PwdCheckFlag(org_pwd);
 
+                    stream.WriteTimeout = 1000;
                     stream.Write(sendBuffer, 0, sendBuffer.Length);
                     stream.Flush();
                 }
@@ -218,8 +222,9 @@ namespace ChattingForm
                 clientList.Remove(client);
 
             string Exit_msg = "Bye Bye!";
-            DisplayText(Exit_msg + " - \"" + user_name+"\"");
-            SendMessageAll(" - \"" + user_name + "\"", Exit_msg, true);
+            count--;
+            DisplayText(Exit_msg + " - \"" + user_name+"\" 현재 클라이언트 수 : "+count);
+            SendMessageAll(" - \"" + user_name + "\" 현재 클라이언트 수 : " + count, Exit_msg, true);
             client.Close();
         }
 
@@ -259,6 +264,11 @@ namespace ChattingForm
 
                     byte[] send_byte = MakeEncryptMsg(user_name + message);
 
+                    string text = DecryptMsg(send_byte);
+
+                    text = MakeOriginMsg(text);
+
+                    stream.WriteTimeout = 1000;
                     stream.Write(send_byte, 0, send_byte.Length);
                     stream.Flush();
                 }
@@ -272,6 +282,7 @@ namespace ChattingForm
 
                     byte[] normal_text = MakeEncryptMsg(message);
 
+                    stream.WriteTimeout = 1000;
                     stream.Write(normal_text, 0, normal_text.Length);
                     stream.Flush();
                 }
@@ -295,11 +306,11 @@ namespace ChattingForm
         // 암호화 함수
         private byte[] EncryptMsg(string msg)
         {
-            //byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
-            byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
+            byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
+            //byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
 
             int size = 0;
-            send_enc_ptr = encrypt_msg(msgToAnsiByte, out size);
+            IntPtr send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
 
@@ -310,14 +321,14 @@ namespace ChattingForm
         private string DecryptMsg(byte[] msg)
         {
             int size = 0;
-            send_dec_ptr = decrypt_msg(msg, out size);
+            IntPtr send_dec_ptr = decrypt_msg(msg, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
 
-            //string msgToUTF8String = Encoding.UTF8.GetString(buffer);
-            string msgToAnsiString = Encoding.Default.GetString(buffer);
+            string msgToUTF8String = Encoding.UTF8.GetString(buffer);
+            //string msgToAnsiString = Encoding.Default.GetString(buffer);
 
-            return msgToAnsiString;
+            return msgToUTF8String;
         }
 
         // 닉네임 입력받는 함수
@@ -340,7 +351,7 @@ namespace ChattingForm
                 msg = msg.Substring(0, msg.IndexOf("&"));
             }
 
-            if (msg.Contains("<SOT>")) //msg.Contains("|")
+            if (msg.Contains(">SOT<")) //msg.Contains("|")
             {
                 msg = msg.Substring(5);
             }
@@ -351,14 +362,14 @@ namespace ChattingForm
         // 오류를 제거한 암호문 만드는 함수
         private byte[] MakeEncryptMsg(string msg)
         {
-            msg = "<SOT>" + msg + "&";
+            msg = ">SOT<" + msg + "&";
 
             byte[] send_byte_msg = EncryptMsg(msg);
 
             while (send_byte_msg.Length < 16)
             {
-                msg = msg + "&";
-                // 암호화
+                msg += "$";
+
                 send_byte_msg = EncryptMsg(msg);
             }
 
@@ -370,14 +381,14 @@ namespace ChattingForm
         {
             if (pwd == inputPwd)
             {
-                string compare_correct = "<SOT>OK&";
+                string compare_correct = ">SOT<OK&";
                 byte[] compare_result = Encoding.Default.GetBytes(compare_correct);
                 flag = false;
                 return compare_result;
             }
             else
             {
-                string compare_correct = "<SOT>NOTOK&";
+                string compare_correct = ">SOT<NOTOK&";
                 byte[] compare_result = Encoding.Default.GetBytes(compare_correct);
                 return compare_result;
             }
@@ -414,14 +425,14 @@ namespace ChattingForm
                 for (int i = 0; i < pwd.Length - 1; i++)
                     sec += "*";
 
-                this.InputIp.ReadOnly = true;
-                this.InputIp.TabStop = false;
+                //this.InputIp.ReadOnly = true;
+                //this.InputIp.TabStop = false;
 
-                this.InputPort.ReadOnly = true;
-                this.InputPort.TabStop = false;
+                //this.InputPort.ReadOnly = true;
+                //this.InputPort.TabStop = false;
 
-                this.OpenButton.Enabled = false;
-                this.OpenButton.TabStop = false;
+                //this.OpenButton.Enabled = false;
+                //this.OpenButton.TabStop = false;
 
                 DisplayText("[PassWord Setting] - " + (pwd[0] + sec) + "\n");
             }
@@ -444,8 +455,6 @@ namespace ChattingForm
             if (server != null)
             {
                 server.Stop();
-                Marshal.FreeHGlobal(send_enc_ptr);
-                Marshal.FreeHGlobal(send_dec_ptr);
                 server = null;
             }
         }

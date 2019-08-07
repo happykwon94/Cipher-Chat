@@ -57,10 +57,11 @@ namespace ChattingForm
             {
                 byte[] buffer = new byte[1024];
                 string msg = string.Empty;
-                int bytes = 0;
-
+                
                 while (true)
-                {
+                    {
+                    int bytes = 0;
+
                     if (clientSocket.Connected)
                         stream = clientSocket.GetStream();
                     else

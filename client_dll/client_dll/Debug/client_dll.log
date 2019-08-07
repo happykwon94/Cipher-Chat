@@ -3,8 +3,8 @@ C:\Users\komsco\source\repos\client_dll\LEA_Source\include\config.h(1,1): warnin
   client.cpp
   dllmain.cpp
   코드를 생성하고 있습니다...
-C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(37): warning C4172:  지역 변수 또는 임시: cipher_msg_op의 주소를 반환하고 있습니다.
 C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(53): warning C4172:  지역 변수 또는 임시: plain_msg_op의 주소를 반환하고 있습니다.
+C:\Users\komsco\source\repos\client_dll\client_dll\client.cpp(37): warning C4172:  지역 변수 또는 임시: cipher_msg_op의 주소를 반환하고 있습니다.
 LINK : warning LNK4075: '/INCREMENTAL'이(가) '/LTCG' 사양으로 인해 무시됩니다.
      C:\Users\komsco\source\repos\client_dll\Debug\client_dll.lib 라이브러리 및 C:\Users\komsco\source\repos\client_dll\Debug\client_dll.exp 개체를 생성하고 있습니다.
 LINK : warning LNK4098: 'LIBCMT' defaultlib가 다른 라이브러리와 충돌합니다. /NODEFAULTLIB:library를 사용하십시오.

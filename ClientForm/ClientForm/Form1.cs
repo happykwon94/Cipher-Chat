@@ -35,9 +35,6 @@ namespace ClientForm
         TcpClient client = new TcpClient();
         NetworkStream stream = default(NetworkStream);
 
-        IntPtr send_enc_ptr;
-        IntPtr send_dec_ptr;
-
         //********************************************************************************************************
 
 
@@ -89,20 +86,6 @@ namespace ClientForm
         }
 
 
-        // 암호화
-        private string DecryptMsg(byte[] msg)
-        {
-            int size = 0;
-            send_dec_ptr = decrypt_msg(msg, out size);
-            byte[] buffer = new byte[size];
-            Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
-
-            //string msgToUTF8String = Encoding.UTF8.GetString(buffer);
-            string msgToAnsiString = Encoding.Default.GetString(buffer);
-
-            return msgToAnsiString;
-        }
-
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
         private string MakeOriginMsg(string msg)
         {
@@ -111,7 +94,7 @@ namespace ClientForm
                 msg = msg.Substring(0, msg.IndexOf("&"));
             }
 
-            if (msg.Contains("<SOT>")) //msg.Contains("|")
+            if (msg.Contains(">SOT<")) //msg.Contains("|")
             {
                 msg = msg.Substring(5);
             }
@@ -122,14 +105,14 @@ namespace ClientForm
         // 오류를 제거한 암호문을 만드는 함수
         private byte[] MakeEncryptMsg(string msg)
         {
-            msg = "<SOT>" + msg + "&";
+            msg = ">SOT<" + msg + "&";
 
             byte[] send_byte_msg = EncryptMsg(msg);
 
             while (send_byte_msg.Length < 16)
             {
-                msg = msg + "&";
-                // 암호화
+                msg += "$";
+
                 send_byte_msg = EncryptMsg(msg);
             }
 
@@ -139,15 +122,29 @@ namespace ClientForm
         // 암호화
         private byte[] EncryptMsg(string msg)
         {
-            //byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
-            byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
+            byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
+            //byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
 
             int size = 0;
-            send_enc_ptr = encrypt_msg(msgToAnsiByte, out size);
+            IntPtr send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
 
             return buffer;
+        }
+
+        // 암호화
+        private string DecryptMsg(byte[] msg)
+        {
+            int size = 0;
+            IntPtr send_dec_ptr = decrypt_msg(msg, out size);
+            byte[] buffer = new byte[size];
+            Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
+
+            string msgToUTF8String = Encoding.UTF8.GetString(buffer);
+            ///string msgToAnsiString = Encoding.Default.GetString(buffer);
+
+            return msgToUTF8String;
         }
 
         // 비밀번호를 입력받는 함수
@@ -183,8 +180,8 @@ namespace ClientForm
         {
             bool return_result = false;
 
-            //string pwd_result = Encoding.UTF8.GetString(result, 0, result_length);
-            string pwd_result = Encoding.Default.GetString(result, 0, result_length);
+            string pwd_result = Encoding.UTF8.GetString(result, 0, result_length);
+            //string pwd_result = Encoding.Default.GetString(result, 0, result_length);
 
             pwd_result = MakeOriginMsg(pwd_result);
 
@@ -248,6 +245,7 @@ namespace ClientForm
 
                     stream = client.GetStream();
 
+                    stream.WriteTimeout = 1000;
                     stream.Write(pwd, 0, pwd.Length);
                     stream.Flush();
 
@@ -261,6 +259,7 @@ namespace ClientForm
                             int read_pwd_length = 0;
                             if (stream.CanRead)
                             {
+                                stream.ReadTimeout = 1000;
                                 read_pwd_length = stream.Read(result_read, 0, result_read.Length);
                             }
 
@@ -277,6 +276,7 @@ namespace ClientForm
 
                                 stream = client.GetStream();
 
+                                stream.WriteTimeout = 1000;
                                 stream.Write(pwd, 0, pwd.Length);
                                 stream.Flush();
                             }
@@ -289,8 +289,11 @@ namespace ClientForm
                         byte[] chatName = InputChatName();
 
                         if (stream.CanWrite)
+                        {
+                            stream.WriteTimeout = 1000;
                             stream.Write(chatName, 0, chatName.Length);
-                        stream.Flush();
+                            stream.Flush();
+                        }
                         //닉네임 설정 <End>
 
                         Thread t_handler = new Thread(RecvMsg);
@@ -329,11 +332,21 @@ namespace ClientForm
             }
             else
             {
+                NetworkStream stream = client.GetStream();
+
                 byte[] send_byte_msg = MakeEncryptMsg(input_msg);
 
+                string text = DecryptMsg(send_byte_msg);
+
+                text = MakeOriginMsg(text);
+
+                //MessageBox.Show("text : "+ text);
+
+                stream.WriteTimeout = 1000;
                 stream.Write(send_byte_msg, 0, send_byte_msg.Length);
                 stream.Flush();
                 this.InputMSG.Text = "";
+
             }
         }
 

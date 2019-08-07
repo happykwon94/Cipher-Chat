@@ -26,7 +26,7 @@ unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // ¾ÏÈ£È­
 
 	while (s_temp.length() % 16 != 0)
 	{
-		s_temp.append(" ");
+		s_temp += '0';
 	}
 
 	lea_cbc_enc(cipher_msg_op, (const unsigned char*)s_temp.c_str(),
@@ -52,9 +52,5 @@ unsigned char* decrypt_msg(unsigned char* cipher_msg, int& size)
 
 	return plain_msg_op;
 }
-
-//**********************************************************************************************************
-
-//**********************************************************************************************************
 
 //**********************************************************************************************************
