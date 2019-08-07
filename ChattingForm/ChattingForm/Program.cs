@@ -14,7 +14,6 @@ using System.Diagnostics;
 namespace ChattingForm
 {
 
-
     static class Program
     {
         /// <summary>
@@ -59,17 +58,17 @@ namespace ChattingForm
                 byte[] buffer = new byte[1024];
                 string msg = string.Empty;
                 int bytes = 0;
-                int MessageCount = 0;
 
                 while (true)
                 {
-                    MessageCount++;
                     stream = clientSocket.GetStream();
 
                     if (stream.CanRead)
                         bytes = stream.Read(buffer, 0, buffer.Length);
-                    else
+
+                    if (bytes == 0)
                         continue;
+
                     byte[] temp = new byte[bytes];
                     Array.Copy(buffer, temp, temp.Length);
 
@@ -85,8 +84,7 @@ namespace ChattingForm
 
                 if (clientSocket != null)
                 {
-                    if (OnDisconnected != null)
-                        OnDisconnected(clientSocket, clientList[clientSocket].ToString());
+                    OnDisconnected(clientSocket, clientList[clientSocket].ToString());
                 }
             }
             catch (Exception err)
@@ -97,8 +95,7 @@ namespace ChattingForm
 
                 if (clientSocket != null)
                 {
-                    if (OnDisconnected != null)
-                        OnDisconnected(clientSocket, clientList[clientSocket].ToString());
+                    OnDisconnected(clientSocket, clientList[clientSocket].ToString());
                 }
             }
         }

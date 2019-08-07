@@ -60,13 +60,85 @@ namespace ChattingForm
             while (true)
             {
                 counter++;
-                client = server.AcceptTcpClient();
-
-                if (client != null)
+                try
                 {
-                    Thread acceptCl = new Thread(() => AcceptClient(client));
-                    acceptCl.IsBackground = true;
-                    acceptCl.Start();
+                    client = server.AcceptTcpClient();
+
+
+                    flag = true;
+                    userNameSetFlag = true;
+
+                    NetworkStream stream = client.GetStream();
+
+                    DisplayText("[ Connecting... ]\n");
+
+
+                    // 비밀번호 입력받아서 대조
+                    while (flag)
+                    {
+                        byte[] pwd_read = new byte[1024];
+                        int read_pwd_length = 0;
+
+                        read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+
+                        if (read_pwd_length != 0)
+                        {
+                            byte[] temp_arr = new byte[read_pwd_length];
+                            Array.Copy(pwd_read, temp_arr, read_pwd_length);
+
+                            string org_pwd = DecryptMsg(temp_arr);
+
+                            org_pwd = MakeOriginMsg(org_pwd);
+
+                            byte[] sendBuffer = PwdCheckFlag(org_pwd);
+
+                            stream.Write(sendBuffer, 0, sendBuffer.Length);
+                            stream.Flush();
+                        }
+                    }
+
+                    // 닉네임 입력받아서 저장
+                    while (userNameSetFlag)
+                    {
+                        byte[] buffer = new byte[1024];
+
+                        int bytes = stream.Read(buffer, 0, buffer.Length);
+
+                        //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
+                        byte[] temp = new byte[bytes];
+                        Array.Copy(buffer, temp, temp.Length);
+
+                        string user_name = DecryptMsg(temp);
+                        user_name = MakeOriginMsg(user_name);
+
+                        UserNameCheck(user_name);
+                    }
+
+                    // 클라이언트 동작
+                    handleClient h_client = new handleClient();
+                    h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
+                    h_client.OnDisconnected += new handleClient.DisconnectedHandler(h_client_OnDisconnected);
+                    h_client.startClient(client, clientList);
+                    //if (client != null)
+                    //{
+                    //    Thread acceptCl = new Thread(() => AcceptClient(client));
+                    //    acceptCl.IsBackground = true;
+                    //    acceptCl.Start();
+                    //}
+                }
+                catch(SocketException err)
+                {
+                    Trace.WriteLine(string.Format("[ Server SocketException Error ] \n {0}", err.Message));
+
+                    this.OutputMSG.AppendText("[ Server SocketException Error] " + err + "\n\n");
+                    client.Close();
+                }
+                catch(Exception err)
+                {
+                    Trace.WriteLine(string.Format("[ Server Exception Error ] \n {0}", err.Message));
+
+                    this.OutputMSG.AppendText("[ Server Exception Error] " + err + "\n\n");
+                    client.Close();
                 }
             }
         }
@@ -81,62 +153,53 @@ namespace ChattingForm
 
             DisplayText("[ Connecting... ]\n");
 
-            try
+
+            // 비밀번호 입력받아서 대조
+            while (flag)
             {
-                // 비밀번호 입력받아서 대조
-                while (flag)
+                byte[] pwd_read = new byte[1024];
+                int read_pwd_length = 0;
+
+                read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+
+                if (read_pwd_length != 0)
                 {
-                    byte[] pwd_read = new byte[1024];
-                    int read_pwd_length = 0;
+                    byte[] temp_arr = new byte[read_pwd_length];
+                    Array.Copy(pwd_read, temp_arr, read_pwd_length);
 
-                    read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
+                    string org_pwd = DecryptMsg(temp_arr);
 
-                    if (read_pwd_length != 0)
-                    {
-                        byte[] temp_arr = new byte[read_pwd_length];
-                        Array.Copy(pwd_read, temp_arr, read_pwd_length);
+                    org_pwd = MakeOriginMsg(org_pwd);
 
-                        string org_pwd = DecryptMsg(temp_arr);
+                    byte[] sendBuffer = PwdCheckFlag(org_pwd);
 
-                        org_pwd = MakeOriginMsg(org_pwd);
-
-                        byte[] sendBuffer = PwdCheckFlag(org_pwd);
-
-                        stream.Write(sendBuffer, 0, sendBuffer.Length);
-                        stream.Flush();
-                    }
+                    stream.Write(sendBuffer, 0, sendBuffer.Length);
+                    stream.Flush();
                 }
-
-                // 닉네임 입력받아서 저장
-                while(userNameSetFlag)
-                {
-                    byte[] buffer = new byte[1024];
-
-                    int bytes = stream.Read(buffer, 0, buffer.Length);
-
-                    //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
-                    byte[] temp = new byte[bytes];
-                    Array.Copy(buffer, temp, temp.Length);
-
-                    string user_name = DecryptMsg(temp);
-                    user_name = MakeOriginMsg(user_name);
-
-                    UserNameCheck(user_name);
-                }
-
-                // 클라이언트 동작
-                handleClient h_client = new handleClient();
-                h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
-                h_client.OnDisconnected += new handleClient.DisconnectedHandler(h_client_OnDisconnected);
-                h_client.startClient(client, clientList);
             }
-            catch (Exception err)
+
+            // 닉네임 입력받아서 저장
+            while (userNameSetFlag)
             {
-                Trace.WriteLine(string.Format("[ Error ] \n {0}", err.Message));
+                byte[] buffer = new byte[1024];
 
-                this.OutputMSG.AppendText("[Error] " + err + "\n\n");
-                client.Close();
+                int bytes = stream.Read(buffer, 0, buffer.Length);
+
+                //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
+                byte[] temp = new byte[bytes];
+                Array.Copy(buffer, temp, temp.Length);
+
+                string user_name = DecryptMsg(temp);
+                user_name = MakeOriginMsg(user_name);
+
+                UserNameCheck(user_name);
             }
+
+            // 클라이언트 동작
+            handleClient h_client = new handleClient();
+            h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
+            h_client.OnDisconnected += new handleClient.DisconnectedHandler(h_client_OnDisconnected);
+            h_client.startClient(client, clientList);
         }
 
 
@@ -146,9 +209,9 @@ namespace ChattingForm
             if (clientList.ContainsKey(client))
                 clientList.Remove(client);
 
-            string Exit_msg = "Client Exit";
+            string Exit_msg = "Bye Bye!";
             DisplayText(Exit_msg + " - \"" + user_name+"\"");
-            SendMessageAll(Exit_msg, "[" + user_name + "] ", true);
+            SendMessageAll(" - \"" + user_name + "\"", Exit_msg, true);
             client.Close();
         }
 
@@ -422,6 +485,17 @@ namespace ChattingForm
 
             SendMessageAll(end_msg, "", false);
 
+            if (client != null)
+            {
+                client.Close();
+                client = null;
+            }
+
+            if (server != null)
+            {
+                server.Stop();
+                server = null;
+            }
         }
 
         private void InputIp_KeyDown(object sender, KeyEventArgs e)

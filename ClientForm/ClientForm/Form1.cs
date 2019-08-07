@@ -45,31 +45,18 @@ namespace ClientForm
         {
             while (true)
             {
-                try
-                {
-                    if (client.Connected)
-                        stream = client.GetStream();
+                stream = client.GetStream();
 
-                    int BUFFERSIZE = client.ReceiveBufferSize;
+                int BUFFERSIZE = client.ReceiveBufferSize;
 
-                    byte[] buffer = new byte[BUFFERSIZE];
+                byte[] buffer = new byte[BUFFERSIZE];
 
-                    int bytes = stream.Read(buffer, 0, buffer.Length);
+                int bytes = stream.Read(buffer, 0, buffer.Length);
 
-                    if (bytes != 0)
-                        OutputMsgPrint(buffer);
-                    else
-                        continue;
-                }
-
-                catch (Exception err)
-                {
-                    this.OutputMSG.AppendText("[Recv Error] " + err + "\n\n");
-                    client.Close();
-
-                    break;
-                }
-
+                if (bytes != 0)
+                    OutputMsgPrint(buffer);
+                else
+                    continue;
             }
         }
 
@@ -385,6 +372,12 @@ namespace ClientForm
                 this.InputIp.Focus();
                 SendKeys.Send("{backspace}");
             }
+        }
+
+        private void FormClosing_Event(object sender, FormClosingEventArgs e)
+        {
+            if (client != null)
+                client.Close();
         }
         //********************************************************************************************************
 

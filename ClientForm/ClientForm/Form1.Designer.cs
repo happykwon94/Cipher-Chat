@@ -149,6 +149,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Cipher-Chat (Client)";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormClosing_Event);
             this.ResumeLayout(false);
             this.PerformLayout();
 
