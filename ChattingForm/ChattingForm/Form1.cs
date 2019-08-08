@@ -42,6 +42,11 @@ namespace ChattingForm
         bool pwdSetFlag;
         static int count = 0;
 
+        static int NameCount = 2;
+
+        IntPtr send_enc_ptr;
+        IntPtr send_dec_ptr;
+
         public Dictionary<TcpClient, string> clientList = new Dictionary<TcpClient, string>();
 
 //***************************************** 전역변수 설정(끝) ****************************************************
@@ -86,7 +91,6 @@ namespace ChattingForm
                         byte[] pwd_read = new byte[1024];
                         int read_pwd_length = 0;
 
-                        stream.ReadTimeout = 1000;
                         read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                         if (read_pwd_length != 0)
@@ -100,7 +104,6 @@ namespace ChattingForm
 
                             byte[] sendBuffer = PwdCheckFlag(org_pwd);
 
-                            stream.WriteTimeout = 1000;
                             stream.Write(sendBuffer, 0, sendBuffer.Length);
                             stream.Flush();
                         }
@@ -111,7 +114,6 @@ namespace ChattingForm
                     {
                         byte[] buffer = new byte[1024];
 
-                        stream.ReadTimeout = 1000;
                         int bytes = stream.Read(buffer, 0, buffer.Length);
 
                         //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
@@ -123,6 +125,8 @@ namespace ChattingForm
 
                         UserNameCheck(user_name);
                     }
+
+                    DisplayText("[ Connect! ] - Client Member : " + count +"\n");
 
                     // 클라이언트 동작
                     handleClient h_client = new handleClient();
@@ -170,7 +174,6 @@ namespace ChattingForm
                 byte[] pwd_read = new byte[1024];
                 int read_pwd_length = 0;
 
-                stream.ReadTimeout = 1000;
                 read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
 
                 if (read_pwd_length != 0)
@@ -184,7 +187,6 @@ namespace ChattingForm
 
                     byte[] sendBuffer = PwdCheckFlag(org_pwd);
 
-                    stream.WriteTimeout = 1000;
                     stream.Write(sendBuffer, 0, sendBuffer.Length);
                     stream.Flush();
                 }
@@ -223,8 +225,8 @@ namespace ChattingForm
 
             string Exit_msg = "Bye Bye!";
             count--;
-            DisplayText(Exit_msg + " - \"" + user_name+"\" 현재 클라이언트 수 : "+count);
-            SendMessageAll(" - \"" + user_name + "\" 현재 클라이언트 수 : " + count, Exit_msg, true);
+            DisplayText(Exit_msg + " - \"" + user_name+"\" 현재 클라이언트 수 : "+clientList.Count);
+            SendMessageAll(" - \"" + user_name + "\" 현재 클라이언트 수 : " + clientList.Count, Exit_msg, true);
             client.Close();
         }
 
@@ -268,7 +270,6 @@ namespace ChattingForm
 
                     text = MakeOriginMsg(text);
 
-                    stream.WriteTimeout = 1000;
                     stream.Write(send_byte, 0, send_byte.Length);
                     stream.Flush();
                 }
@@ -282,7 +283,6 @@ namespace ChattingForm
 
                     byte[] normal_text = MakeEncryptMsg(message);
 
-                    stream.WriteTimeout = 1000;
                     stream.Write(normal_text, 0, normal_text.Length);
                     stream.Flush();
                 }
@@ -310,7 +310,7 @@ namespace ChattingForm
             //byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
 
             int size = 0;
-            IntPtr send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
+            send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_enc_ptr, buffer, 0, buffer.Length);
 
@@ -321,7 +321,7 @@ namespace ChattingForm
         private string DecryptMsg(byte[] msg)
         {
             int size = 0;
-            IntPtr send_dec_ptr = decrypt_msg(msg, out size);
+            send_dec_ptr = decrypt_msg(msg, out size);
             byte[] buffer = new byte[size];
             Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
 
@@ -334,13 +334,27 @@ namespace ChattingForm
         // 닉네임 입력받는 함수
         private void UserNameCheck(string userName)
         {
-            clientList.Add(client, userName);
-            string temp = "[ ID : " + userName + " ] - Join!\n";
 
-            DisplayText(temp);
-            SendMessageAll(temp, "", false);
+            if(clientList.ContainsValue(userName) && clientList.Count != 0)
+            {
+                clientList.Add(client, userName + NameCount);
+                string temp = "[ ID : " + userName + "_" + (NameCount++) + " ] - Join!\n";
 
-            userNameSetFlag = false;
+                DisplayText(temp);
+                SendMessageAll(temp, "", false);
+
+                userNameSetFlag = false;
+            }
+            else
+            {
+                clientList.Add(client, userName);
+                string temp = "[ ID : " + userName + " ] - Join!\n";
+
+                DisplayText(temp);
+                SendMessageAll(temp, "", false);
+
+                userNameSetFlag = false;
+            }
         }
 
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
@@ -455,6 +469,8 @@ namespace ChattingForm
             if (server != null)
             {
                 server.Stop();
+                Marshal.FreeHGlobal(send_enc_ptr);
+                Marshal.FreeHGlobal(send_dec_ptr);
                 server = null;
             }
         }

@@ -35,6 +35,8 @@ namespace ClientForm
         TcpClient client = new TcpClient();
         NetworkStream stream = default(NetworkStream);
 
+        bool NickNameFlag;
+
         //********************************************************************************************************
 
 
@@ -170,7 +172,7 @@ namespace ClientForm
 
             byte[] buffer = MakeEncryptMsg(input_chat_name);
 
-            this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
+            //this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
 
             return buffer;
         }
@@ -245,7 +247,6 @@ namespace ClientForm
 
                     stream = client.GetStream();
 
-                    stream.WriteTimeout = 1000;
                     stream.Write(pwd, 0, pwd.Length);
                     stream.Flush();
 
@@ -259,7 +260,6 @@ namespace ClientForm
                             int read_pwd_length = 0;
                             if (stream.CanRead)
                             {
-                                stream.ReadTimeout = 1000;
                                 read_pwd_length = stream.Read(result_read, 0, result_read.Length);
                             }
 
@@ -276,7 +276,6 @@ namespace ClientForm
 
                                 stream = client.GetStream();
 
-                                stream.WriteTimeout = 1000;
                                 stream.Write(pwd, 0, pwd.Length);
                                 stream.Flush();
                             }
@@ -286,14 +285,11 @@ namespace ClientForm
                         this.OutputMSG.AppendText("[ 채팅 서버에 연결되었습니다. ]\n\n");
 
                         //닉네임 설정 <Start>
-                        byte[] chatName = InputChatName();
 
-                        if (stream.CanWrite)
-                        {
-                            stream.WriteTimeout = 1000;
+                        byte[] chatName = InputChatName();
+                        if(stream.CanWrite)
                             stream.Write(chatName, 0, chatName.Length);
-                            stream.Flush();
-                        }
+                        stream.Flush();
                         //닉네임 설정 <End>
 
                         Thread t_handler = new Thread(RecvMsg);
@@ -342,7 +338,6 @@ namespace ClientForm
 
                 //MessageBox.Show("text : "+ text);
 
-                stream.WriteTimeout = 1000;
                 stream.Write(send_byte_msg, 0, send_byte_msg.Length);
                 stream.Flush();
                 this.InputMSG.Text = "";
