@@ -360,12 +360,12 @@ namespace ChattingForm
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
         private string MakeOriginMsg(string msg)
         {
-            if (msg.Contains("&")) //msg.Contains("$")
+            if (msg.Contains("&"))
             {
                 msg = msg.Substring(0, msg.IndexOf("&"));
             }
 
-            if (msg.Contains(">SOT<")) //msg.Contains("|")
+            if (msg.Contains(">SOT<"))
             {
                 msg = msg.Substring(5);
             }
@@ -439,14 +439,14 @@ namespace ChattingForm
                 for (int i = 0; i < pwd.Length - 1; i++)
                     sec += "*";
 
-                //this.InputIp.ReadOnly = true;
-                //this.InputIp.TabStop = false;
+                this.InputIp.ReadOnly = true;
+                this.InputIp.TabStop = false;
 
-                //this.InputPort.ReadOnly = true;
-                //this.InputPort.TabStop = false;
+                this.InputPort.ReadOnly = true;
+                this.InputPort.TabStop = false;
 
-                //this.OpenButton.Enabled = false;
-                //this.OpenButton.TabStop = false;
+                this.OpenButton.Enabled = false;
+                this.OpenButton.TabStop = false;
 
                 DisplayText("[PassWord Setting] - " + (pwd[0] + sec) + "\n");
             }
