@@ -4,15 +4,15 @@
 #define keyPWD "OK"
 
 LEA_KEY lea_key;
-const char* iv = "internshipprog!";
-
+const char* mk = "internshipprog!";
+const char* iv = "InitialVector!!";
 
 //******************************************************************************************
 // 암호화 과정
 
 void key_init()
 {
-	lea_set_key(&lea_key, (const unsigned char*)iv, 16);
+	lea_set_key(&lea_key, (const unsigned char*)mk, 16);
 }
 
 unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // 암호화

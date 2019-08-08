@@ -40,8 +40,8 @@ namespace ChattingForm
         bool flag;
         bool userNameSetFlag;
         bool pwdSetFlag;
-        static int count = 0;
 
+        static int count = 0;
         static int NameCount = 2;
 
         IntPtr send_enc_ptr;
@@ -116,7 +116,6 @@ namespace ChattingForm
 
                         int bytes = stream.Read(buffer, 0, buffer.Length);
 
-                        //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
                         byte[] temp = new byte[bytes];
                         Array.Copy(buffer, temp, temp.Length);
 
@@ -133,12 +132,7 @@ namespace ChattingForm
                     h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
                     h_client.OnDisconnected += new handleClient.DisconnectedHandler(h_client_OnDisconnected);
                     h_client.startClient(client, clientList);
-                    //if (client != null)
-                    //{
-                    //    Thread acceptCl = new Thread(() => AcceptClient(client));
-                    //    acceptCl.IsBackground = true;
-                    //    acceptCl.Start();
-                    //}
+
                 }
                 catch(SocketException err)
                 {
@@ -156,66 +150,6 @@ namespace ChattingForm
                 }
             }
         }
-
-        public void AcceptClient(TcpClient client)
-        {
-
-            flag = true;
-            userNameSetFlag = true;
-
-            NetworkStream stream = client.GetStream();
-
-            DisplayText("[ Connecting... ]\n");
-
-
-            // 비밀번호 입력받아서 대조
-            while (flag)
-            {
-                byte[] pwd_read = new byte[1024];
-                int read_pwd_length = 0;
-
-                read_pwd_length = stream.Read(pwd_read, 0, pwd_read.Length);
-
-                if (read_pwd_length != 0)
-                {
-                    byte[] temp_arr = new byte[read_pwd_length];
-                    Array.Copy(pwd_read, temp_arr, read_pwd_length);
-
-                    string org_pwd = DecryptMsg(temp_arr);
-
-                    org_pwd = MakeOriginMsg(org_pwd);
-
-                    byte[] sendBuffer = PwdCheckFlag(org_pwd);
-
-                    stream.Write(sendBuffer, 0, sendBuffer.Length);
-                    stream.Flush();
-                }
-            }
-
-            // 닉네임 입력받아서 저장
-            while (userNameSetFlag)
-            {
-                byte[] buffer = new byte[1024];
-
-                int bytes = stream.Read(buffer, 0, buffer.Length);
-
-                //string user_name = Encoding.UTF8.GetString(buffer, 0, bytes);
-                byte[] temp = new byte[bytes];
-                Array.Copy(buffer, temp, temp.Length);
-
-                string user_name = DecryptMsg(temp);
-                user_name = MakeOriginMsg(user_name);
-
-                UserNameCheck(user_name);
-            }
-
-            // 클라이언트 동작
-            handleClient h_client = new handleClient();
-            h_client.OnReceived += new handleClient.MessageDisplayHandler(OnReceived);
-            h_client.OnDisconnected += new handleClient.DisconnectedHandler(h_client_OnDisconnected);
-            h_client.startClient(client, clientList);
-        }
-
 
         // 클라이언트 삭제시 정보 삭제
         void h_client_OnDisconnected(TcpClient client, string user_name)
@@ -307,7 +241,6 @@ namespace ChattingForm
         private byte[] EncryptMsg(string msg)
         {
             byte[] msgToUTF8Byte = Encoding.UTF8.GetBytes(msg);
-            //byte[] msgToAnsiByte = Encoding.Default.GetBytes(msg);
 
             int size = 0;
             send_enc_ptr = encrypt_msg(msgToUTF8Byte, out size);
@@ -326,7 +259,6 @@ namespace ChattingForm
             Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
 
             string msgToUTF8String = Encoding.UTF8.GetString(buffer);
-            //string msgToAnsiString = Encoding.Default.GetString(buffer);
 
             return msgToUTF8String;
         }
@@ -360,12 +292,12 @@ namespace ChattingForm
         // 메세지의 인덱스를 제거하여 원래의 메세지로 바꿔주는 함수
         private string MakeOriginMsg(string msg)
         {
-            if (msg.Contains("&")) //msg.Contains("$")
+            if (msg.Contains("&"))
             {
                 msg = msg.Substring(0, msg.IndexOf("&"));
             }
 
-            if (msg.Contains(">SOT<")) //msg.Contains("|")
+            if (msg.Contains(">SOT<"))
             {
                 msg = msg.Substring(5);
             }
@@ -439,14 +371,14 @@ namespace ChattingForm
                 for (int i = 0; i < pwd.Length - 1; i++)
                     sec += "*";
 
-                //this.InputIp.ReadOnly = true;
-                //this.InputIp.TabStop = false;
+                this.InputIp.ReadOnly = true;
+                this.InputIp.TabStop = false;
 
-                //this.InputPort.ReadOnly = true;
-                //this.InputPort.TabStop = false;
+                this.InputPort.ReadOnly = true;
+                this.InputPort.TabStop = false;
 
-                //this.OpenButton.Enabled = false;
-                //this.OpenButton.TabStop = false;
+                this.OpenButton.Enabled = false;
+                this.OpenButton.TabStop = false;
 
                 DisplayText("[PassWord Setting] - " + (pwd[0] + sec) + "\n");
             }

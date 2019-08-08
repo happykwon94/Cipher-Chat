@@ -1,14 +1,13 @@
 #include "pch.h"
 #include "Server.h"
 
-#define PWD "komsco.com"
-
 LEA_KEY lea_key;
-const char* iv = "internshipprog!";
+const char* mk = "internshipprog!";
+const char* iv = "InitialVector!!";
 
 void key_init()
 {
-	lea_set_key(&lea_key, (const unsigned char*)iv, 16);
+	lea_set_key(&lea_key, (const unsigned char*)mk, 16);
 }
 
 unsigned char* encrypt_msg(unsigned char* plain_msg, int& size)  // ¾ÏÈ£È­

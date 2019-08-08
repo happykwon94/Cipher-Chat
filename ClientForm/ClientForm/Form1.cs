@@ -35,8 +35,6 @@ namespace ClientForm
         TcpClient client = new TcpClient();
         NetworkStream stream = default(NetworkStream);
 
-        bool NickNameFlag;
-
         //********************************************************************************************************
 
 
@@ -144,7 +142,6 @@ namespace ClientForm
             Marshal.Copy(send_dec_ptr, buffer, 0, buffer.Length);
 
             string msgToUTF8String = Encoding.UTF8.GetString(buffer);
-            ///string msgToAnsiString = Encoding.Default.GetString(buffer);
 
             return msgToUTF8String;
         }
@@ -172,8 +169,6 @@ namespace ClientForm
 
             byte[] buffer = MakeEncryptMsg(input_chat_name);
 
-            //this.OutputMSG.AppendText("[ 이름이 설정되었습니다. ]  \"" + input_chat_name + "\"\n\n");
-
             return buffer;
         }
 
@@ -183,7 +178,6 @@ namespace ClientForm
             bool return_result = false;
 
             string pwd_result = Encoding.UTF8.GetString(result, 0, result_length);
-            //string pwd_result = Encoding.Default.GetString(result, 0, result_length);
 
             pwd_result = MakeOriginMsg(pwd_result);
 
@@ -335,8 +329,6 @@ namespace ClientForm
                 string text = DecryptMsg(send_byte_msg);
 
                 text = MakeOriginMsg(text);
-
-                //MessageBox.Show("text : "+ text);
 
                 stream.Write(send_byte_msg, 0, send_byte_msg.Length);
                 stream.Flush();
