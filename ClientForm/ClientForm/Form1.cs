@@ -280,8 +280,13 @@ namespace ClientForm
 
                         //닉네임 설정 <Start>
 
+<<<<<<< HEAD
                         byte[] chatName = InputChatName();
                         if(stream.CanWrite)
+=======
+                        if (stream.CanWrite)
+                        {
+>>>>>>> 1bb67e0642c3a8cc5f1fb33195c3944defbe6815
                             stream.Write(chatName, 0, chatName.Length);
                         stream.Flush();
                         //닉네임 설정 <End>
